@@ -1,0 +1,35 @@
+﻿
+> backend@0.0.1 test
+> jest
+
+node.exe : PASS 
+src/app.controller.spec.ts
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (P  
+  ASS src/app.controlle   
+ r.spec.ts:String) [],    
+ RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+  AppController
+    root
+      ΓêÜ should return 
+"Hello World!" (15 ms)
+
+Test Suites: 1 passed, 1 
+total
+Tests:       1 passed, 1 
+total
+Snapshots:   0 total
+Time:        3.966 s
+Ran all test suites.

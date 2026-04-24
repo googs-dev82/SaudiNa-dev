@@ -1,0 +1,38 @@
+import {
+  Building2,
+  CalendarClock,
+  CalendarDays,
+  CalendarRange,
+  ClipboardList,
+  FileText,
+  FolderKanban,
+  KeyRound,
+  LayoutDashboard,
+  Mail,
+  Map,
+  MapPinned,
+  SquarePen,
+  Shield,
+  UserCircle2,
+  Users,
+} from "lucide-react";
+import type { PortalNavIcon } from "./navigation";
+
+export const portalIconMap: Record<PortalNavIcon, React.ComponentType<{ className?: string }>> = {
+  "layout-dashboard": LayoutDashboard,
+  "user-circle": UserCircle2,
+  "clipboard-list": ClipboardList,
+  "calendar-range": CalendarRange,
+  "calendar-clock": CalendarClock,
+  "calendar-star": CalendarDays,
+  edit: SquarePen,
+  "file-text": FileText,
+  "folder-kanban": FolderKanban,
+  mail: Mail,
+  map: Map,
+  "map-pinned": MapPinned,
+  users: Users,
+  shield: Shield,
+  "key-round": KeyRound,
+  "building-2": Building2,
+};

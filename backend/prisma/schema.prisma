@@ -1,0 +1,644 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis, uuid_ossp(map: "uuid-ossp", schema: "extensions")]
+}
+
+model User {
+  id                                                          String             @id @default(uuid()) @db.Uuid
+  email                                                       String             @unique
+  displayName                                                 String
+  preferredLanguage                                           String             @default("ar")
+  status                                                      UserStatus         @default(ACTIVE)
+  provider                                                    IdentityProvider   @default(INTERNAL)
+  externalSubject                                             String?
+  createdAt                                                   DateTime           @default(now())
+  updatedAt                                                   DateTime           @updatedAt
+  lastLoginAt                                                 DateTime?
+  assignments                                                 assignments[]
+  in_service_meetings_in_service_meetings_approvedByIdTousers InServiceMeeting[] @relation("in_service_meetings_approvedByIdTousers")
+  in_service_meetings_in_service_meetings_createdByIdTousers  InServiceMeeting[] @relation("in_service_meetings_createdByIdTousers")
+  recovery_meetings                                           RecoveryMeeting[]
+  events_events_createdByIdTousers                            Event[]            @relation("events_createdByIdTousers")
+  events_events_organizedByUserIdTousers                      Event[]            @relation("events_organizedByUserIdTousers")
+  event_booking_requests                                      EventBookingRequest[]
+  event_publication_statuses                                  EventPublicationStatus[] @relation("event_publication_statuses")
+  event_status_history                                        EventStatusHistory[] @relation("event_status_history")
+  event_audit_logs                                            EventAuditLog[]    @relation("event_audit_logs")
+  reports_reports_approvedByIdTousers                         Report[]           @relation("reports_approvedByIdTousers")
+  reports_reports_createdByIdTousers                          Report[]           @relation("reports_createdByIdTousers")
+
+  @@map("users")
+}
+
+model Region {
+  id                String            @id @default(uuid()) @db.Uuid
+  code              String            @unique
+  nameAr            String
+  nameEn            String
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  areas             Area[]
+  committees        Committee[]
+  recovery_meetings RecoveryMeeting[]
+  events            Event[]           @relation("region_events")
+
+  @@map("regions")
+}
+
+model Area {
+  id                String            @id @default(uuid()) @db.Uuid
+  regionId          String            @db.Uuid
+  code              String            @unique
+  nameAr            String
+  nameEn            String
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  regions           Region            @relation(fields: [regionId], references: [id])
+  committees        Committee[]
+  recovery_meetings RecoveryMeeting[]
+  events            Event[]           @relation("area_events")
+
+  @@index([regionId, isActive])
+  @@map("areas")
+}
+
+model Committee {
+  id                  String             @id @default(uuid()) @db.Uuid
+  code                String             @unique
+  level               CommitteeLevel
+  regionId            String             @db.Uuid
+  areaId              String?            @db.Uuid
+  nameAr              String
+  nameEn              String
+  descriptionAr       String?
+  descriptionEn       String?
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  areas               Area?              @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  regions             Region             @relation(fields: [regionId], references: [id])
+  in_service_meetings InServiceMeeting[]
+
+  @@index([regionId, areaId, isActive])
+  @@map("committees")
+}
+
+model RecoveryMeeting {
+  id             String                @id @default(uuid()) @db.Uuid
+  regionId       String                @db.Uuid
+  areaId         String                @db.Uuid
+  nameAr         String
+  nameEn         String
+  descriptionAr  String?
+  descriptionEn  String?
+  language       MeetingLanguage
+  gender         MeetingGender
+  city           String
+  district       String?
+  dayOfWeek      String
+  startTime      String
+  endTime        String?
+  isOnline       Boolean               @default(false)
+  meetingLink    String?
+  latitude       Float?
+  longitude      Float?
+  addressAr      String?
+  addressEn      String?
+  organizerName  String?
+  organizerPhone String?
+  status         RecoveryMeetingStatus @default(DRAFT)
+  createdById    String                @db.Uuid
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  areas          Area                  @relation(fields: [areaId], references: [id])
+  users          User                  @relation(fields: [createdById], references: [id])
+  regions        Region                @relation(fields: [regionId], references: [id])
+
+  @@index([latitude, longitude])
+  @@index([status, areaId, city, dayOfWeek])
+  @@map("recovery_meetings")
+}
+
+model Event {
+  id                                       String                  @id @default(uuid()) @db.Uuid
+  regionId                                 String                  @db.Uuid
+  areaId                                   String                  @db.Uuid
+  title                                    String
+  description                              String?
+  visibility                               EventVisibility         @default(PRIVATE)
+  mode                                     EventMode
+  zoomEnabled                              Boolean                 @default(false)
+  status                                   EventStatus             @default(DRAFT)
+  date                                     DateTime
+  startTime                                String
+  endTime                                  String?
+  durationMinutes                          Int?
+  timezone                                 String                  @default("Asia/Riyadh")
+  invitationInstructions                   String?
+  organizerName                            String?
+  organizerUserId                          String?                 @db.Uuid
+  locationAddress                          String?
+  latitude                                 Float?
+  longitude                                Float?
+  meetingLink                              String?
+  createdById                              String                  @db.Uuid
+  publishedAt                              DateTime?
+  cancelledAt                              DateTime?
+  rescheduledAt                            DateTime?
+  createdAt                                DateTime                @default(now())
+  updatedAt                                DateTime                @updatedAt
+  areas                                    Area                    @relation("area_events", fields: [areaId], references: [id])
+  regions                                  Region                  @relation("region_events", fields: [regionId], references: [id])
+  users_events_createdByIdTousers          User                    @relation("events_createdByIdTousers", fields: [createdById], references: [id])
+  users_events_organizedByUserIdTousers    User?                   @relation("events_organizedByUserIdTousers", fields: [organizerUserId], references: [id])
+  bookingRequests                          EventBookingRequest[]
+  slots                                    EventSlot[]
+  tentativeHolds                           TentativeHold[]
+  zoomMeetings                             ZoomMeeting[]
+  statusHistory                            EventStatusHistory[]
+  notificationLogs                         NotificationLog[]
+  auditLogs                                EventAuditLog[]
+  publicationStatus                        EventPublicationStatus?
+
+  @@index([visibility, status, date, startTime])
+  @@index([regionId, areaId, status, date])
+  @@map("events")
+}
+
+model EventBookingRequest {
+  id                     String                     @id @default(uuid()) @db.Uuid
+  eventId                String                     @db.Uuid
+  requestedById          String                     @db.Uuid
+  slotId                 String?                    @unique @db.Uuid
+  requestedStartAt       DateTime
+  requestedEndAt         DateTime
+  timezone               String                     @default("Asia/Riyadh")
+  status                 EventBookingRequestStatus  @default(DRAFT)
+  idempotencyKey         String                     @unique
+  failureReason          String?
+  validatedAt            DateTime?
+  confirmedAt            DateTime?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+  events                 Event                      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users                  User                       @relation(fields: [requestedById], references: [id])
+  slots                  EventSlot?                 @relation("event_booking_request_slot", fields: [slotId], references: [id], onDelete: SetNull)
+  tentativeHolds         TentativeHold[]
+  zoomMeetings           ZoomMeeting[]
+  notificationLogs       NotificationLog[]
+
+  @@index([eventId, status])
+  @@index([requestedStartAt, requestedEndAt])
+  @@map("event_booking_requests")
+}
+
+model EventSlot {
+  id                String            @id @default(uuid()) @db.Uuid
+  eventId           String            @db.Uuid
+  slotKey           String            @unique
+  slotStartAt       DateTime
+  slotEndAt         DateTime
+  timezone          String            @default("Asia/Riyadh")
+  status            EventSlotStatus   @default(FREE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  events            Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookingRequest    EventBookingRequest? @relation("event_booking_request_slot")
+  tentativeHold     TentativeHold?
+  zoomMeeting       ZoomMeeting?
+
+  @@index([slotStartAt, slotEndAt, status])
+  @@index([eventId, status])
+  @@map("event_slots")
+}
+
+model TentativeHold {
+  id                String          @id @default(uuid()) @db.Uuid
+  eventId           String          @db.Uuid
+  bookingRequestId  String          @unique @db.Uuid
+  slotId            String          @unique @db.Uuid
+  holdToken         String          @unique
+  expiresAt         DateTime
+  status            EventHoldStatus    @default(ACTIVE)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  events            Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookingRequest    EventBookingRequest @relation(fields: [bookingRequestId], references: [id], onDelete: Cascade)
+  slots             EventSlot       @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt, status])
+  @@map("tentative_holds")
+}
+
+model ZoomMeeting {
+  id                String           @id @default(uuid()) @db.Uuid
+  eventId           String           @db.Uuid
+  bookingRequestId  String           @db.Uuid
+  slotId            String?          @unique @db.Uuid
+  zoomMeetingId     String           @unique
+  joinUrl           String
+  hostUrl           String?
+  startUrl          String?
+  externalStatus    String
+  idempotencyKey    String           @unique
+  bookedAt          DateTime         @default(now())
+  cancelledAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  events            Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookingRequest    EventBookingRequest @relation(fields: [bookingRequestId], references: [id], onDelete: Cascade)
+  slots             EventSlot?       @relation(fields: [slotId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, bookedAt])
+  @@map("zoom_meetings")
+}
+
+model EventPublicationStatus {
+  id              String                 @id @default(uuid()) @db.Uuid
+  eventId         String                 @unique @db.Uuid
+  status          EventPublicationStatusEnum @default(NOT_ELIGIBLE)
+  eligibleAt      DateTime?
+  publishedAt     DateTime?
+  unpublishedAt   DateTime?
+  publishedById   String?                @db.Uuid
+  notes           String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  events          Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users           User?                  @relation("event_publication_statuses", fields: [publishedById], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+  @@map("event_publication_status")
+}
+
+model EventStatusHistory {
+  id                String        @id @default(uuid()) @db.Uuid
+  eventId           String        @db.Uuid
+  previousStatus    EventStatus
+  newStatus         EventStatus
+  changedById       String        @db.Uuid
+  changedAt         DateTime      @default(now())
+  reason            String?
+  metadata          Json?
+  events            Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users             User          @relation("event_status_history", fields: [changedById], references: [id])
+
+  @@index([eventId, changedAt])
+  @@map("event_status_history")
+}
+
+model NotificationLog {
+  id                String               @id @default(uuid()) @db.Uuid
+  eventId           String               @db.Uuid
+  bookingRequestId  String?              @db.Uuid
+  notificationType  EventNotificationType
+  recipientEmail    String
+  status            NotificationStatus   @default(PENDING)
+  providerMessageId String?
+  errorMessage      String?
+  sentAt            DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  events            Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  bookingRequest    EventBookingRequest? @relation(fields: [bookingRequestId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, createdAt])
+  @@index([status, createdAt])
+  @@map("notification_logs")
+}
+
+model EventAuditLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  eventId          String   @db.Uuid
+  actorUserId      String?  @db.Uuid
+  action           String
+  beforeState      Json?
+  afterState       Json?
+  source           String?
+  correlationId    String?
+  createdAt        DateTime @default(now())
+  events           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users            User?    @relation("event_audit_logs", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([eventId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@map("event_audit_logs")
+}
+
+model InServiceMeeting {
+  id                                            String                 @id @default(uuid()) @db.Uuid
+  committeeId                                   String                 @db.Uuid
+  titleAr                                       String
+  titleEn                                       String
+  description                                   String?
+  meetingDate                                   DateTime
+  startTime                                     String
+  endTime                                       String?
+  mom                                           String                 @map("mom")
+  plannedActivities                             Json
+  notes                                         String?
+  status                                        InServiceMeetingStatus @default(DRAFT)
+  createdById                                   String                 @db.Uuid
+  approvedById                                  String?                @db.Uuid
+  rejectionComments                             String?
+  createdAt                                     DateTime               @default(now())
+  updatedAt                                     DateTime               @updatedAt
+  users_in_service_meetings_approvedByIdTousers User?                  @relation("in_service_meetings_approvedByIdTousers", fields: [approvedById], references: [id], onDelete: Restrict)
+  committees                                    Committee              @relation(fields: [committeeId], references: [id])
+  users_in_service_meetings_createdByIdTousers  User                   @relation("in_service_meetings_createdByIdTousers", fields: [createdById], references: [id])
+
+  @@index([committeeId, status, meetingDate])
+  @@map("in_service_meetings")
+}
+
+model Report {
+  id                                String       @id @default(uuid()) @db.Uuid
+  type                              ReportType
+  status                            ReportStatus @default(DRAFT)
+  approvalRequired                  Boolean      @default(false)
+  filters                           Json
+  filePath                          String?
+  createdById                       String       @db.Uuid
+  approvedById                      String?      @db.Uuid
+  createdAt                         DateTime     @default(now())
+  updatedAt                         DateTime     @updatedAt
+  users_reports_approvedByIdTousers User?        @relation("reports_approvedByIdTousers", fields: [approvedById], references: [id], onDelete: Restrict)
+  users_reports_createdByIdTousers  User         @relation("reports_createdByIdTousers", fields: [createdById], references: [id])
+
+  @@index([status, type, createdById])
+  @@map("reports")
+}
+
+model ResourceCategory {
+  id        String     @id @default(uuid()) @db.Uuid
+  code      String     @unique
+  nameAr    String
+  nameEn    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  resources Resource[]
+
+  @@map("resource_categories")
+}
+
+model Resource {
+  id                  String           @id @default(uuid()) @db.Uuid
+  categoryId          String           @db.Uuid
+  titleAr             String
+  titleEn             String
+  descriptionAr       String?
+  descriptionEn       String?
+  filePath            String
+  fileName            String
+  mimeType            String
+  fileSize            Int
+  isPublic            Boolean          @default(true)
+  downloadCount       Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  resource_categories ResourceCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([isPublic, categoryId])
+  @@map("resources")
+}
+
+model ContactSubmission {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  name                  String
+  email                 String
+  phone                 String?
+  subject               String
+  message               String
+  status                ContactSubmissionStatus @default(NEW)
+  internalNotes         String?
+  assignedCommitteeCode String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  @@index([status, createdAt])
+  @@map("contact_submissions")
+}
+
+model AuditLog {
+  id               String      @id @default(uuid()) @db.Uuid
+  timestamp        DateTime    @default(now())
+  userId           String?     @db.Uuid
+  userRoleSnapshot String?
+  action           AuditAction
+  resourceType     String
+  resourceId       String?
+  method           String?
+  path             String?
+  ipAddress        String?
+  correlationId    String?
+  beforeState      Json?
+  afterState       Json?
+  metadata         Json?
+
+  @@index([timestamp, action])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}
+
+model assignments {
+  id          String    @id @db.Uuid
+  userId      String    @db.Uuid
+  roleCode    RoleCode
+  scopeType   ScopeType
+  scopeId     String?
+  scopeCode   String?
+  active      Boolean   @default(true)
+  activeFrom  DateTime?
+  activeUntil DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  users       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([scopeType, scopeId])
+  @@index([userId, active])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum IdentityProvider {
+  GOOGLE
+  ZOHO
+  INTERNAL
+}
+
+enum RoleCode {
+  SUPER_ADMIN
+  REGIONAL_MANAGER
+  AREA_MANAGER
+  COMMITTEE_MANAGER
+  COMMITTEE_SECRETARY
+  MEETING_EDITOR
+  CONTENT_EDITOR
+}
+
+enum ScopeType {
+  GLOBAL
+  REGION
+  AREA
+  COMMITTEE
+}
+
+enum CommitteeLevel {
+  REGIONAL
+  AREA
+}
+
+enum MeetingLanguage {
+  ARABIC
+  ENGLISH
+  BILINGUAL
+}
+
+enum MeetingGender {
+  MALE
+  FEMALE
+  MIXED
+}
+
+enum RecoveryMeetingStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum InServiceMeetingStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  ARCHIVED
+}
+
+enum ContactSubmissionStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ReportType {
+  MEETING_SUMMARY
+  ACTIVITY_REPORT
+  USER_ACTIVITY
+  AUDIT_TRAIL_EXTRACT
+  RESOURCE_USAGE
+}
+
+enum ReportStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  GENERATING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum EventVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum EventMode {
+  PHYSICAL
+  ONLINE
+  HYBRID
+}
+
+enum EventStatus {
+  DRAFT
+  PENDING_VALIDATION
+  TENTATIVE
+  CONFIRMED
+  PENDING_PUBLICATION
+  PUBLISHED
+  CANCELLED
+  RESCHEDULED
+  FAILED
+}
+
+enum EventPublicationStatusEnum {
+  NOT_ELIGIBLE
+  ELIGIBLE
+  PUBLISHED
+  UNPUBLISHED
+  REJECTED
+}
+
+enum EventBookingRequestStatus {
+  DRAFT
+  PENDING_VALIDATION
+  TENTATIVE
+  CONFIRMED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum EventHoldStatus {
+  ACTIVE
+  EXPIRED
+  RELEASED
+  CONSUMED
+}
+
+enum EventSlotStatus {
+  FREE
+  HELD
+  BOOKED
+  RELEASED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRYING
+}
+
+enum EventNotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_FAILURE
+  REMINDER
+  CANCELLATION
+  RESCHEDULE
+  PUBLICATION
+  HOLD_EXPIRY
+}
+
+enum AuditAction {
+  CREATED
+  UPDATED
+  ARCHIVED
+  DELETED
+  STATUS_CHANGED
+  SUBMITTED
+  APPROVED
+  REJECTED
+  ACCESS_DENIED
+  LOGIN
+  CONTACT_SUBMITTED
+  REPORT_RUN
+}

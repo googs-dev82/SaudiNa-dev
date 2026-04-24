@@ -1,0 +1,169 @@
+export const siteSettingsSeed = {
+  _id: "siteSettings",
+  _type: "siteSettings",
+  siteTitle: {
+    en: "SaudiNA Message",
+    ar: "رسالة سعودينا",
+  },
+  siteDescription: {
+    en: "SaudiNA public platform for recovery meetings, resources, and guided support.",
+    ar: "منصة سعودينا للرسائل التعريفية والاجتماعات والموارد الداعمة للتعافي.",
+  },
+  navigation: [
+    { _key: "nav-home", _type: "link", kind: "internal", href: "/", label: { en: "Home", ar: "الرئيسية" } },
+    { _key: "nav-meetings", _type: "link", kind: "internal", href: "/meetings", label: { en: "Meetings", ar: "الاجتماعات" } },
+    { _key: "nav-literature", _type: "link", kind: "internal", href: "/literature", label: { en: "Literature", ar: "الأدبيات" } },
+    { _key: "nav-resources", _type: "link", kind: "internal", href: "/resources", label: { en: "Resources", ar: "الموارد" } },
+    { _key: "nav-about", _type: "link", kind: "internal", href: "/about", label: { en: "About", ar: "عن الزمالة" } },
+  ],
+  footerBlurb: {
+    en: "We are a global fellowship serving people in recovery, grounded in the belief that every addict can stop using, lose the desire, and find a new way to live.",
+    ar: "نحن مجتمع عالمي لخدمة المتعافين، نؤمن بأن كل مدمن يمكنه التوقف عن التعاطي وفقدان الرغبة فيه وإيجاد طريق جديد للحياة.",
+  },
+  footerColumns: [
+    {
+      _key: "footer-quick",
+      title: { en: "Quick access", ar: "الوصول السريع" },
+      links: [
+        { _key: "footer-quick-1", _type: "link", kind: "internal", href: "/meetings", label: { en: "Find a meeting", ar: "ابحث عن اجتماع" } },
+        { _key: "footer-quick-2", _type: "link", kind: "internal", href: "/resources", label: { en: "Resource library", ar: "قائمة الأدبيات" } },
+        { _key: "footer-quick-3", _type: "link", kind: "internal", href: "/contact", label: { en: "Contact us", ar: "تواصل معنا" } },
+      ],
+    },
+    {
+      _key: "footer-platform",
+      title: { en: "About the platform", ar: "عن المنصة" },
+      links: [
+        { _key: "footer-platform-1", _type: "link", kind: "internal", href: "/about", label: { en: "About us", ar: "من نحن؟" } },
+        { _key: "footer-platform-2", _type: "link", kind: "internal", href: "/regions", label: { en: "Regions", ar: "المناطق" } },
+        { _key: "footer-platform-3", _type: "link", kind: "internal", href: "/literature", label: { en: "Literature", ar: "الأدبيات" } },
+      ],
+    },
+  ],
+  footerCopyright: {
+    en: "© 2024 SaudiNA Fellowship. All rights reserved.",
+    ar: "© ٢٠٢٤ زمالة سعودينا. جميع الحقوق محفوظة",
+  },
+  socialLinks: [
+    { _key: "social-facebook", platform: "Facebook", href: "https://facebook.com" },
+    { _key: "social-instagram", platform: "Instagram", href: "https://instagram.com" },
+    { _key: "social-x", platform: "X / Twitter", href: "https://x.com" },
+  ],
+};
+
+export const pageSeeds = [
+  {
+    _id: "page-home",
+    _type: "page",
+    pageType: "home",
+    title: { en: "Home", ar: "الرئيسية" },
+    slug: { _type: "slug", current: "home" },
+    summary: {
+      en: "A public landing page for recovery, community, and support.",
+      ar: "صفحة افتتاحية عامة للتعافي والمجتمع والدعم.",
+    },
+    sections: [
+      {
+        _key: "home-hero",
+        _type: "heroBlock",
+        eyebrow: { en: "A recovery community across the Kingdom", ar: "مجتمع يدعم تعافيك في المملكة" },
+        title: { en: "A calm space for starting again", ar: "مساحة هادئة للبداية من جديد" },
+        body: {
+          en: "We are a community of recovering people who support one another. Recovery begins with a single step, and we are here to walk it with you in a culture of confidentiality and acceptance.",
+          ar: "نحن مجتمع من المتعافين الذين يساندون بعضهم البعض. رحلة التعافي تبدأ بخطوة واحدة، ونحن هنا لنخطوها معك في بيئة من السرية والقبول.",
+        },
+        primaryCta: { _type: "link", kind: "internal", href: "/meetings", label: { en: "Find a meeting", ar: "ابحث عن اجتماع" } },
+        secondaryCta: { _type: "link", kind: "internal", href: "/about", label: { en: "Who we are", ar: "من نحن؟" } },
+        theme: "ocean",
+      },
+    ],
+  },
+  {
+    _id: "page-about",
+    _type: "page",
+    pageType: "about",
+    title: { en: "About SaudiNA", ar: "عن زمالة سعودينا" },
+    slug: { _type: "slug", current: "about" },
+    sections: [
+      {
+        _key: "about-hero",
+        _type: "heroBlock",
+        title: { en: "About SaudiNA", ar: "عن زمالة سعودينا" },
+        body: {
+          en: "We are united by a message of hope, recovery, and mutual support in an atmosphere of confidentiality and acceptance.",
+          ar: "تجمعنا رسالة الأمل والتعافي والدعم المتبادل في بيئة من السرية والقبول.",
+        },
+        theme: "sage",
+      },
+    ],
+  },
+  {
+    _id: "page-literature",
+    _type: "page",
+    pageType: "literature",
+    title: { en: "Literature", ar: "الأدبيات" },
+    slug: { _type: "slug", current: "literature" },
+    sections: [
+      {
+        _key: "lit-intro",
+        _type: "richTextBlock",
+        title: { en: "Literature and editorial content", ar: "الأدبيات والمحتوى التحريري" },
+        body: {
+          en: [{ _type: "block", style: "normal", markDefs: [], children: [{ _type: "span", text: "Use this page as the editorial hub for articles, announcements, and public literature." }] }],
+          ar: [{ _type: "block", style: "normal", markDefs: [], children: [{ _type: "span", text: "استخدم هذه الصفحة كمركز تحريري للمقالات والإعلانات والأدبيات العامة." }] }],
+        },
+      },
+    ],
+  },
+];
+
+export const articleSeeds = [
+  {
+    _id: "article-convention-2024",
+    _type: "article",
+    type: "event",
+    title: { en: "Saudi Regional Convention 2024", ar: "المؤتمر الإقليمي السعودي ٢٠٢٤" },
+    slug: { _type: "slug", current: "saudi-regional-convention-2024" },
+    description: {
+      en: "Moments of connection, learning, and shared growth in Riyadh. Be part of this spiritual gathering.",
+      ar: "لحظات من التواصل والتعلم والنمو المشترك في الرياض. كن جزءاً من هذا التجمع الروحي.",
+    },
+    dateLabel: { en: "12 October 2024", ar: "١٢ أكتوبر ٢٠٢٤" },
+    publishedAt: "2024-10-12T09:00:00.000Z",
+  },
+];
+
+export const faqSeeds = [
+  {
+    _id: "faq-find-meeting",
+    _type: "faq",
+    category: "meetings",
+    question: { en: "How do I find a suitable meeting?", ar: "كيف أجد اجتماعاً مناسباً؟" },
+    answer: {
+      en: [{ _type: "block", style: "normal", markDefs: [], children: [{ _type: "span", text: "Use the meetings page to filter by area, day, language, or attendance type." }] }],
+      ar: [{ _type: "block", style: "normal", markDefs: [], children: [{ _type: "span", text: "استخدم صفحة الاجتماعات لتصفية النتائج حسب المنطقة أو اليوم أو اللغة أو نوع الحضور." }] }],
+    },
+    keywords: ["meeting", "find", "filter"],
+  },
+];
+
+export const resourceEditorialSeeds = [
+  {
+    _id: "resource-content-first-steps",
+    _type: "resourceContent",
+    resourceKey: "resource-first-steps",
+    title: { en: "First Steps Guide", ar: "دليل الخطوات الأولى" },
+    description: {
+      en: "Editorial summary for the backend-managed First Steps guide.",
+      ar: "وصف تحريري لدليل الخطوات الأولى المدار من خلال النظام الخلفي.",
+    },
+  },
+];
+
+export const sanitySeedDocuments = [
+  siteSettingsSeed,
+  ...pageSeeds,
+  ...articleSeeds,
+  ...faqSeeds,
+  ...resourceEditorialSeeds,
+];
