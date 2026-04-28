@@ -335,12 +335,20 @@ model EventAuditLog {
 model InServiceMeeting {
   id                                            String                 @id @default(uuid()) @db.Uuid
   committeeId                                   String                 @db.Uuid
+  meetingFormat                                 InServiceMeetingFormat @default(PHYSICAL)
   titleAr                                       String
   titleEn                                       String
   description                                   String?
   meetingDate                                   DateTime
   startTime                                     String
   endTime                                       String?
+  venueName                                     String?
+  city                                          String?
+  district                                      String?
+  address                                       String?
+  zoomJoinUrl                                   String?
+  zoomMeetingId                                 String?
+  zoomPasscode                                  String?
   mom                                           String                 @map("mom")
   plannedActivities                             Json
   notes                                         String?
@@ -530,6 +538,11 @@ enum InServiceMeetingStatus {
   PENDING
   APPROVED
   ARCHIVED
+}
+
+enum InServiceMeetingFormat {
+  PHYSICAL
+  ZOOM
 }
 
 enum ContactSubmissionStatus {

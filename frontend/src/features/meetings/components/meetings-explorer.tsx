@@ -1,16 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   CalendarDays,
-  Heart,
+  Download,
+  type LucideIcon,
   List,
   Map,
   MapPin,
   Monitor,
-  Phone,
+  RotateCcw,
+  Search,
   UserRound,
   Video,
 } from "lucide-react";
@@ -40,7 +43,9 @@ const MeetingsMap = dynamic(
 type MeetingsExplorerProps = {
   locale: Locale;
   meetings: MeetingDto[];
+  weeklyMeetings?: MeetingDto[];
   areas: AreaDto[];
+  defaultDayOfWeek?: string;
   initialFilters: {
     query?: string;
     city?: string;
@@ -64,15 +69,17 @@ type DraftFilters = {
 };
 
 const genderOptions = [
-  { value: "MALE", label: { ar: "رجال", en: "Men" } },
-  { value: "FEMALE", label: { ar: "نساء", en: "Women" } },
+  { value: "MALE", label: { ar: "رجال فقط", en: "Male-only" } },
+  { value: "FEMALE", label: { ar: "نساء فقط", en: "Women-only" } },
   { value: "MIXED", label: { ar: "مختلط", en: "Mixed" } },
 ] as const;
 
 export function MeetingsExplorer({
   locale,
   meetings,
+  weeklyMeetings = meetings,
   areas,
+  defaultDayOfWeek = "all",
   initialFilters,
 }: MeetingsExplorerProps) {
   const router = useRouter();
@@ -84,8 +91,8 @@ export function MeetingsExplorer({
   );
   const [draftFilters, setDraftFilters] = useState<DraftFilters>({
     query: initialFilters.query ?? "",
-    city: initialFilters.city ?? "",
-    dayOfWeek: initialFilters.dayOfWeek ?? "all",
+    city: initialFilters.city ?? "all",
+    dayOfWeek: initialFilters.dayOfWeek ?? defaultDayOfWeek,
     language: initialFilters.language ?? "all",
     areaId: initialFilters.areaId ?? "all",
     gender: initialFilters.gender ?? "all",
@@ -100,7 +107,7 @@ export function MeetingsExplorer({
           heroText:
             "هنا تبدأ رحلة الالتزام. ابحث عن الاجتماعات القريبة منك أو انضم إلى حلقاتنا عبر الإنترنت في بيئة آمنة وداعمة تماماً.",
           filtersTitle: "مرشحات الاجتماعات",
-          filtersSubtitle: "صمّم طريقك نحو الطمأنينة",
+          filtersSubtitle: "اختر المدينة أو اليوم أو نوع الحضور للوصول للاجتماع المناسب.",
           allMeetings: "كل الاجتماعات",
           mapView: "عرض الخريطة",
           area: "المنطقة",
@@ -109,34 +116,32 @@ export function MeetingsExplorer({
           type: "النوع",
           gender: "الجنس",
           weekdays: "أيام الأسبوع",
+          allDays: "كل الأيام",
+          downloadPdf: "تحميل PDF للأسبوع الحالي",
           allAreas: "كل المناطق",
           allCities: "الكل",
           allDistricts: "الكل",
           apply: "تطبيق الفلاتر",
           clear: "مسح الفلاتر",
-          results: "اجتماع متاح حالياً",
+          results: "اجتماع متاح",
           detailedList: "قائمة مفصلة",
           mapLabel: "خريطة",
           activeNow: "نشط الآن",
-          nearest: "قريب منك جداً",
           details: "التفاصيل",
-          join: "انضم للرابط المباشر",
+          join: "عرض تفاصيل الاجتماع",
           showOnMap: "عرض الموقع على الخريطة",
-          contactCoordinator: "اتصل بالمنسق",
-          openSeats: "آخر المقاعد",
-          currentCapacity: "نسبة الامتلاء الحالية",
-          seatsHint: "سارع بالحجز لضمان مكانك في هذه الورشة النوعية.",
           foundPrefix: "تم العثور على",
           foundSuffix: "اجتماعات",
           updating: "جاري التحديث",
+          searchPlaceholder: "اسم الاجتماع أو المدينة",
         }
       : {
-          heroKicker: "National recovery platform",
-          heroTitle: "Find your calm",
+          heroKicker: "Narcotics Anonymous Saudi Arabia",
+          heroTitle: "Find a meeting",
           heroText:
-            "This is where commitment begins. Search nearby meetings or join online circles in a space designed for privacy and support.",
+            "Search in-person and online meetings across Saudi Arabia. Use the filters to find a time, place, and format that works for you.",
           filtersTitle: "Meeting filters",
-          filtersSubtitle: "Refine your sanctuary",
+          filtersSubtitle: "Choose a city, day, language, or attendance type to narrow the list.",
           allMeetings: "All meetings",
           mapView: "Map view",
           area: "Area",
@@ -145,33 +150,30 @@ export function MeetingsExplorer({
           type: "Type",
           gender: "Gender",
           weekdays: "Weekdays",
+          allDays: "All days",
+          downloadPdf: "Download this week as PDF",
           allAreas: "All areas",
           allCities: "All",
           allDistricts: "All",
           apply: "Apply filters",
           clear: "Clear filters",
-          results: "meetings available now",
+          results: "meetings available",
           detailedList: "Detailed list",
           mapLabel: "Map",
           activeNow: "Active now",
-          nearest: "Closest to you",
           details: "Details",
-          join: "Join direct link",
+          join: "View meeting details",
           showOnMap: "Show on map",
-          contactCoordinator: "Contact coordinator",
-          openSeats: "Almost full",
-          currentCapacity: "Current fill rate",
-          seatsHint:
-            "Reserve your place early to secure a spot in this session.",
           foundPrefix: "Found",
           foundSuffix: "meetings",
           updating: "Updating",
+          searchPlaceholder: "Meeting name or city",
         };
 
   const activeFilterCount = [
     draftFilters.query || undefined,
-    draftFilters.city || undefined,
-    draftFilters.dayOfWeek !== "all" ? draftFilters.dayOfWeek : undefined,
+    draftFilters.city !== "all" ? draftFilters.city : undefined,
+    draftFilters.dayOfWeek !== defaultDayOfWeek ? draftFilters.dayOfWeek : undefined,
     draftFilters.language !== "all" ? draftFilters.language : undefined,
     draftFilters.areaId !== "all" ? draftFilters.areaId : undefined,
     draftFilters.gender !== "all" ? draftFilters.gender : undefined,
@@ -179,6 +181,13 @@ export function MeetingsExplorer({
   ].filter(Boolean).length;
 
   const normalizedMeetings = useMemo(() => meetings, [meetings]);
+  const cityOptions = useMemo(
+    () =>
+      Array.from(new Set(weeklyMeetings.map((meeting) => meeting.city).filter(Boolean)))
+        .sort((first, second) => first.localeCompare(second, locale === "ar" ? "ar" : "en")),
+    [locale, weeklyMeetings],
+  );
+  const weekRange = useMemo(() => getCurrentWeekRange(locale), [locale]);
 
   const commitFilters = (nextView = view) => {
     const next = new URLSearchParams(searchParams.toString());
@@ -219,8 +228,8 @@ export function MeetingsExplorer({
   const clearFilters = () => {
     setDraftFilters({
       query: "",
-      city: "",
-      dayOfWeek: "all",
+      city: "all",
+      dayOfWeek: defaultDayOfWeek,
       language: "all",
       areaId: "all",
       gender: "all",
@@ -228,10 +237,88 @@ export function MeetingsExplorer({
     });
 
     startTransition(() => {
-      router.replace(`${pathname}${view === "map" ? "?view=map" : ""}`, {
+      const next = new URLSearchParams();
+      next.set("dayOfWeek", defaultDayOfWeek);
+      if (view === "map") next.set("view", "map");
+      router.replace(`${pathname}?${next.toString()}`, {
         scroll: false,
       });
     });
+  };
+
+  const downloadWeeklyPdf = async () => {
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    await loadArabicPdfFont(doc);
+    const title = locale === "ar" ? "قائمة اجتماعات الأسبوع" : "Weekly Meetings List";
+    const dateRange = `${weekRange.from} - ${weekRange.to}`;
+    const tableHead =
+      locale === "ar"
+        ? [["اللغة", "الفئة", "النوع", "المدينة", "الاجتماع", "الوقت", "اليوم"]]
+        : [["Day", "Time", "Meeting", "City", "Format", "Audience", "Language"]];
+    const tableBody = sortMeetingsByWeekday(weeklyMeetings).map((meeting) => {
+      const row = [
+        formatDayName(meeting.dayOfWeek, locale),
+        `${meeting.startTime}${meeting.endTime ? ` - ${meeting.endTime}` : ""}`,
+        getMeetingTitle(meeting, locale),
+        `${meeting.city}${meeting.district ? ` / ${meeting.district}` : ""}`,
+        meeting.isOnline ? (locale === "ar" ? "افتراضي" : "Online") : (locale === "ar" ? "حضوري" : "In person"),
+        formatGender(meeting.gender, locale),
+        formatLanguage(meeting.language, locale),
+      ];
+
+      return locale === "ar" ? [...row].reverse() : row;
+    });
+
+    doc.setR2L(false);
+    doc.setFillColor(88, 129, 87);
+    doc.rect(0, 0, doc.internal.pageSize.getWidth(), 86, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("SaudiNAArabic", "normal");
+    doc.setFontSize(20);
+    doc.text(title, locale === "ar" ? doc.internal.pageSize.getWidth() - 40 : 40, 36, {
+      align: locale === "ar" ? "right" : "left",
+    });
+    doc.setFontSize(11);
+    doc.setFont(locale === "ar" ? "helvetica" : "SaudiNAArabic", "normal");
+    doc.text(locale === "ar" ? dateRange : `Date from - date to: ${dateRange}`, locale === "ar" ? doc.internal.pageSize.getWidth() - 40 : 40, 58, {
+      align: locale === "ar" ? "right" : "left",
+    });
+    doc.setFont("SaudiNAArabic", "normal");
+
+    autoTable(doc, {
+      startY: 108,
+      head: tableHead,
+      body: tableBody,
+      styles: {
+        font: "SaudiNAArabic",
+        fontSize: 9,
+        cellPadding: 7,
+        textColor: [27, 36, 44],
+        lineColor: [220, 226, 218],
+        lineWidth: 0.5,
+        halign: locale === "ar" ? "right" : "left",
+      },
+      headStyles: {
+        fillColor: [49, 92, 63],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [246, 249, 244],
+      },
+      margin: { left: 40, right: 40 },
+      didDrawPage: () => {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        doc.setFontSize(8);
+        doc.setTextColor(90, 108, 100);
+        doc.setFont("SaudiNAArabic", "normal");
+        doc.text(locale === "ar" ? "زمالة المدمنين المجهولين - السعودية" : "Narcotics Anonymous Saudi Arabia", locale === "ar" ? doc.internal.pageSize.getWidth() - 40 : 40, pageHeight - 24, {
+          align: locale === "ar" ? "right" : "left",
+        });
+      },
+    });
+
+    doc.save(`saudina-weekly-meetings-${weekRange.fileFrom}-${weekRange.fileTo}.pdf`);
   };
 
   const firstMapCandidate = normalizedMeetings.find(
@@ -242,38 +329,93 @@ export function MeetingsExplorer({
   );
 
   return (
-    <main>
-      <section className="border-b border-slate-200/80 bg-gradient-to-br from-primary/[0.04] via-background to-secondary/[0.03]">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8 md:py-10">
+    <main className="bg-background">
+      <section className="border-b border-secondary/15 bg-[linear-gradient(135deg,rgba(88,129,87,0.14),rgba(253,252,249,0.96)_48%,rgba(88,129,87,0.08))]">
+        <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 md:px-8 md:py-12 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-3xl">
-            <span className="mb-3 block text-xs font-bold uppercase tracking-[0.3em] text-secondary">
+            <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.24em] text-secondary">
               {labels.heroKicker}
             </span>
-            <h1 className="text-4xl font-bold tracking-tight text-primary md:text-5xl">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
               {labels.heroTitle}
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
               {labels.heroText}
             </p>
           </div>
+          <div className="rounded-lg border border-secondary/20 bg-white/70 px-5 py-4 shadow-sm backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+              {labels.foundPrefix}
+            </p>
+            <p className="mt-1 text-3xl font-semibold text-foreground">
+              {normalizedMeetings.length}
+            </p>
+          </div>
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 md:px-8 lg:flex-row lg:items-start lg:gap-10">
-        <aside className="w-full shrink-0 self-start rounded-[2rem] border border-slate-200 bg-slate-100 lg:sticky lg:top-24 lg:w-80">
-          <div className="space-y-6 p-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 md:px-8 lg:flex-row lg:items-start lg:gap-8">
+        <aside className="w-full shrink-0 self-start rounded-lg border border-secondary/20 bg-[linear-gradient(180deg,rgba(88,129,87,0.10),rgba(255,255,255,0.96))] shadow-sm lg:sticky lg:top-24 lg:w-88">
+          <div className="space-y-5 p-5">
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-foreground">
                 {labels.filtersTitle}
               </h2>
-              <p className="text-sm text-slate-600">{labels.filtersSubtitle}</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">{labels.filtersSubtitle}</p>
             </div>
 
-            <div className="space-y-6 border-t border-slate-200 pt-6">
+            <div className="space-y-5 border-t border-secondary/15 pt-5">
+              <FilterBlock label={labels.weekdays}>
+                <div className="grid grid-cols-2 gap-2">
+                  <DayButton
+                    active={draftFilters.dayOfWeek === "all"}
+                    onClick={() =>
+                      setDraftFilters((current) => ({
+                        ...current,
+                        dayOfWeek: "all",
+                      }))
+                    }
+                  >
+                    {labels.allDays}
+                  </DayButton>
+                  {meetingDayOptions.map((option) => (
+                    <DayButton
+                      key={option.value}
+                      active={draftFilters.dayOfWeek === option.value}
+                      onClick={() =>
+                        setDraftFilters((current) => ({
+                          ...current,
+                          dayOfWeek: option.value,
+                        }))
+                      }
+                    >
+                      {option.label[locale]}
+                    </DayButton>
+                  ))}
+                </div>
+              </FilterBlock>
+
+              <FilterBlock label={locale === "ar" ? "بحث" : "Search"}>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-secondary" />
+                  <Input
+                    className="h-12 rounded-lg border-secondary/20 bg-white ps-10 shadow-none focus-visible:ring-secondary/25"
+                    placeholder={labels.searchPlaceholder}
+                    value={draftFilters.query}
+                    onChange={(event) =>
+                      setDraftFilters((current) => ({
+                        ...current,
+                        query: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </FilterBlock>
+
               <FilterBlock label={labels.area}>
                 <select
                   aria-label={labels.area}
-                  className="h-12 w-full rounded-xl border-none bg-white px-4 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
+                  className="h-12 w-full rounded-lg border border-secondary/20 bg-white px-4 text-sm text-foreground focus:ring-2 focus:ring-secondary/20"
                   value={draftFilters.areaId}
                   onChange={(event) =>
                     setDraftFilters((current) => ({
@@ -293,9 +435,9 @@ export function MeetingsExplorer({
 
               <div className="grid grid-cols-2 gap-3">
                 <FilterBlock label={labels.city}>
-                  <Input
-                    className="border-none bg-white shadow-none"
-                    placeholder={labels.allCities}
+                  <select
+                    aria-label={labels.city}
+                    className="h-12 w-full rounded-lg border border-secondary/20 bg-white px-3 text-sm text-foreground focus:ring-2 focus:ring-secondary/20"
                     value={draftFilters.city}
                     onChange={(event) =>
                       setDraftFilters((current) => ({
@@ -303,14 +445,36 @@ export function MeetingsExplorer({
                         city: event.target.value,
                       }))
                     }
-                  />
+                  >
+                    <option value="all">{labels.allCities}</option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
                 </FilterBlock>
-                <FilterBlock label={labels.district}>
-                  <Input
-                    className="border-none bg-white shadow-none"
-                    placeholder={labels.allDistricts}
-                    disabled
-                  />
+                <FilterBlock label={locale === "ar" ? "اللغة" : "Language"}>
+                  <select
+                    aria-label={locale === "ar" ? "اللغة" : "Language"}
+                    className="h-12 w-full rounded-lg border border-secondary/20 bg-white px-3 text-sm text-foreground focus:ring-2 focus:ring-secondary/20"
+                    value={draftFilters.language}
+                    onChange={(event) =>
+                      setDraftFilters((current) => ({
+                        ...current,
+                        language: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="all">
+                      {locale === "ar" ? "كل اللغات" : "All"}
+                    </option>
+                    {meetingLanguageOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label[locale]}
+                      </option>
+                    ))}
+                  </select>
                 </FilterBlock>
               </div>
 
@@ -335,14 +499,30 @@ export function MeetingsExplorer({
 
               <FilterBlock label={labels.gender}>
                 <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    className={
+                      draftFilters.gender === "all"
+                        ? "rounded-lg bg-secondary px-3 py-2.5 text-center text-xs font-semibold text-white shadow-sm"
+                        : "rounded-lg border border-secondary/15 bg-white px-3 py-2.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:border-secondary/40 hover:text-secondary"
+                    }
+                    onClick={() =>
+                      setDraftFilters((current) => ({
+                        ...current,
+                        gender: "all",
+                      }))
+                    }
+                  >
+                    {locale === "ar" ? "الكل" : "All"}
+                  </button>
                   {genderOptions.map((option) => (
                     <button
                       key={option.value}
                       type="button"
                       className={
                         draftFilters.gender === option.value
-                          ? "rounded-lg bg-primary px-3 py-2 text-center text-xs font-medium text-white"
-                          : "rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-xs font-medium text-slate-600 transition-colors hover:border-primary hover:text-primary"
+                          ? "rounded-lg bg-secondary px-3 py-2.5 text-center text-xs font-semibold text-white shadow-sm"
+                          : "rounded-lg border border-secondary/15 bg-white px-3 py-2.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:border-secondary/40 hover:text-secondary"
                       }
                       onClick={() =>
                         setDraftFilters((current) => ({
@@ -357,79 +537,8 @@ export function MeetingsExplorer({
                 </div>
               </FilterBlock>
 
-              <FilterBlock label={labels.weekdays}>
-                <div className="flex flex-wrap gap-2">
-                  <DayBubble
-                    active={draftFilters.dayOfWeek === "all"}
-                    onClick={() =>
-                      setDraftFilters((current) => ({
-                        ...current,
-                        dayOfWeek: "all",
-                      }))
-                    }
-                  >
-                    {locale === "ar" ? "الكل" : "All"}
-                  </DayBubble>
-                  {meetingDayOptions.map((option) => (
-                    <DayBubble
-                      key={option.value}
-                      active={draftFilters.dayOfWeek === option.value}
-                      onClick={() =>
-                        setDraftFilters((current) => ({
-                          ...current,
-                          dayOfWeek: option.value,
-                        }))
-                      }
-                    >
-                      {locale === "ar"
-                        ? option.label.ar.charAt(0)
-                        : option.label.en.slice(0, 1)}
-                    </DayBubble>
-                  ))}
-                </div>
-              </FilterBlock>
-
-              <FilterBlock label={locale === "ar" ? "اللغة" : "Language"}>
-                <select
-                  aria-label={locale === "ar" ? "اللغة" : "Language"}
-                  className="h-12 w-full rounded-xl border-none bg-white px-4 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
-                  value={draftFilters.language}
-                  onChange={(event) =>
-                    setDraftFilters((current) => ({
-                      ...current,
-                      language: event.target.value,
-                    }))
-                  }
-                >
-                  <option value="all">
-                    {locale === "ar" ? "كل اللغات" : "All languages"}
-                  </option>
-                  {meetingLanguageOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label[locale]}
-                    </option>
-                  ))}
-                </select>
-              </FilterBlock>
-
-              <Input
-                className="border-none bg-white shadow-none"
-                placeholder={
-                  locale === "ar"
-                    ? "ابحث بالاسم أو المدينة"
-                    : "Search by name or city"
-                }
-                value={draftFilters.query}
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    query: event.target.value,
-                  }))
-                }
-              />
-
               <Button
-                className="h-14 w-full rounded-xl hero-gradient text-base font-bold text-primary-foreground"
+                className="h-12 w-full rounded-lg bg-secondary text-base font-semibold text-secondary-foreground shadow-sm hover:bg-secondary/90"
                 onClick={() => commitFilters()}
                 type="button"
               >
@@ -438,11 +547,12 @@ export function MeetingsExplorer({
 
               {activeFilterCount > 0 ? (
                 <Button
-                  className="w-full"
+                  className="w-full rounded-lg border-secondary/20 bg-white text-foreground hover:bg-secondary/10 hover:text-secondary"
                   variant="outline"
                   onClick={clearFilters}
                   type="button"
                 >
+                  <RotateCcw data-icon="inline-start" />
                   {labels.clear}
                 </Button>
               ) : null}
@@ -451,39 +561,50 @@ export function MeetingsExplorer({
         </aside>
 
         <section className="min-w-0 flex-1 lg:mx-auto lg:max-w-4xl">
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="mb-6 flex flex-col gap-4 rounded-lg border border-secondary/15 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
             <div className="text-sm text-muted-foreground">
-              <span className="font-bold text-primary">
+              <span className="font-semibold text-secondary">
                 {normalizedMeetings.length}
               </span>{" "}
               {labels.results}
               {isPending ? ` • ${labels.updating}` : ""}
             </div>
-            <div className="flex items-center rounded-full bg-muted p-1">
-              <button
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button
+                className="rounded-lg border-secondary/20 bg-white text-foreground hover:bg-secondary/10 hover:text-secondary"
+                variant="outline"
+                onClick={downloadWeeklyPdf}
                 type="button"
-                className={
-                  view === "list"
-                    ? "flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-primary shadow-sm"
-                    : "flex items-center gap-2 px-5 py-2 text-sm font-medium text-muted-foreground"
-                }
-                onClick={() => changeView("list")}
               >
-                <List className="h-4 w-4" />
-                <span>{labels.detailedList}</span>
-              </button>
-              <button
-                type="button"
-                className={
-                  view === "map"
-                    ? "flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-primary shadow-sm"
-                    : "flex items-center gap-2 px-5 py-2 text-sm font-medium text-muted-foreground"
-                }
-                onClick={() => changeView("map")}
-              >
-                <Map className="h-4 w-4" />
-                <span>{labels.mapLabel}</span>
-              </button>
+                <Download data-icon="inline-start" />
+                {labels.downloadPdf}
+              </Button>
+              <div className="flex items-center rounded-lg bg-secondary/10 p-1">
+                <button
+                  type="button"
+                  className={
+                    view === "list"
+                      ? "flex items-center gap-2 rounded-md bg-white px-5 py-2 text-sm font-semibold text-foreground shadow-sm"
+                      : "flex items-center gap-2 px-5 py-2 text-sm font-medium text-muted-foreground"
+                  }
+                  onClick={() => changeView("list")}
+                >
+                  <List className="h-4 w-4" />
+                  <span>{labels.detailedList}</span>
+                </button>
+                <button
+                  type="button"
+                  className={
+                    view === "map"
+                      ? "flex items-center gap-2 rounded-md bg-white px-5 py-2 text-sm font-semibold text-foreground shadow-sm"
+                      : "flex items-center gap-2 px-5 py-2 text-sm font-medium text-muted-foreground"
+                  }
+                  onClick={() => changeView("map")}
+                >
+                  <Map className="h-4 w-4" />
+                  <span>{labels.mapLabel}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -502,52 +623,39 @@ export function MeetingsExplorer({
             <MeetingsMap locale={locale} meetings={normalizedMeetings} />
           ) : (
             <div className="flex flex-col gap-8">
-              {normalizedMeetings.map((meeting, index) => {
+              {normalizedMeetings.map((meeting) => {
                 const isOnline = meeting.isOnline;
-                const isNearest = !isOnline && index === 1;
-                const isWorkshop = !isOnline && index === 2;
 
                 return (
                   <article
                     key={meeting.id}
                     className={
                       isOnline
-                        ? "relative overflow-hidden rounded-[2rem] bg-muted p-8 transition-all hover:scale-[1.01]"
-                        : "rounded-[2rem] bg-white p-8 editorial-shadow transition-all hover:scale-[1.01]"
+                        ? "relative overflow-hidden rounded-lg border border-secondary/20 bg-[linear-gradient(135deg,rgba(88,129,87,0.12),rgba(255,255,255,0.96))] p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                        : "rounded-lg border border-border/55 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-secondary/30 hover:shadow-md"
                     }
                   >
                     {isOnline ? (
-                      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/5" />
+                      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-secondary/10" />
                     ) : null}
 
-                    <div className="relative z-10 flex flex-col gap-8">
+                    <div className="relative z-10 flex flex-col gap-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex flex-wrap gap-2">
                           {isOnline ? (
                             <>
-                              <span className="rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                              <span className="rounded-full bg-secondary px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                                 {locale === "ar" ? "أونلاين" : "Online"}
                               </span>
-                              <span className="rounded-full bg-red-100 px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                              <span className="rounded-full bg-white px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
                                 {locale === "ar" ? "عبر زووم" : "Via Zoom"}
                               </span>
                             </>
-                          ) : isWorkshop ? (
-                            <span className="rounded-full bg-red-100 px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
-                              {labels.openSeats}
+                          ) : (
+                            <span className="rounded-full bg-secondary/10 px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-secondary">
+                              {locale === "ar" ? "حضوري" : "In person"}
                             </span>
-                          ) : isNearest ? (
-                            <>
-                              <span className="rounded-full bg-secondary/10 px-4 py-1 text-[10px] font-bold uppercase tracking-wide text-secondary">
-                                {labels.nearest}
-                              </span>
-                              <span className="mt-1 text-xs text-muted-foreground">
-                                {locale === "ar"
-                                  ? "٢.٤ كم من موقعك"
-                                  : "2.4 km from your location"}
-                              </span>
-                            </>
-                          ) : null}
+                          )}
                         </div>
 
                         {isOnline ? (
@@ -558,76 +666,22 @@ export function MeetingsExplorer({
                             <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-secondary" />
                           </div>
                         ) : (
-                          <Heart className="h-5 w-5 text-slate-300" />
+                          <MapPin className="h-5 w-5 text-secondary" />
                         )}
                       </div>
 
                       <div>
-                        <h2 className="mb-4 text-3xl font-bold text-primary">
+                        <h2 className="mb-3 text-2xl font-semibold text-foreground md:text-3xl">
                           {getMeetingTitle(meeting, locale)}
                         </h2>
-                        <p className="leading-8 text-muted-foreground">
+                        <p className="leading-7 text-muted-foreground">
                           {getMeetingDescription(meeting, locale)}
                         </p>
                       </div>
 
-                      {isWorkshop ? (
-                        <div className="space-y-5">
-                          <div>
-                            <div className="mb-3 flex items-end justify-between">
-                              <span className="text-sm font-bold text-slate-700">
-                                {labels.currentCapacity}
-                              </span>
-                              <span className="text-xs font-bold text-secondary">
-                                {locale === "ar"
-                                  ? "١٦ من أصل ٢٠ مقعد محجوز"
-                                  : "16 of 20 seats reserved"}
-                              </span>
-                            </div>
-                            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-                              <div className="h-full w-4/5 bg-secondary" />
-                            </div>
-                            <p className="mt-2 text-[11px] text-slate-400">
-                              {labels.seatsHint}
-                            </p>
-                          </div>
-
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <WorkshopFeature
-                              icon={MapPin}
-                              text={
-                                locale === "ar"
-                                  ? "موقع مناسب يسهل الوصول إليه"
-                                  : "Accessible venue location"
-                              }
-                            />
-                            <WorkshopFeature
-                              icon={Phone}
-                              text={
-                                locale === "ar"
-                                  ? "تتوفر إرشادات قبل الحضور"
-                                  : "Attendance guidance available"
-                              }
-                            />
-                          </div>
-
-                          <div className="flex flex-wrap gap-4 border-t border-slate-100 pt-8">
-                            <Button className="hero-gradient rounded-2xl px-10 py-6 text-base text-primary-foreground">
-                              {locale === "ar" ? "سجل الآن" : "Register now"}
-                            </Button>
-                            <Button
-                              className="rounded-2xl px-6 py-6"
-                              variant="outline"
-                            >
-                              {locale === "ar"
-                                ? "تعرف على المنسقين"
-                                : "Meet the facilitators"}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : isOnline ? (
+                      {isOnline ? (
                         <div className="space-y-6">
-                          <div className="grid gap-6 rounded-2xl border border-white/60 bg-white/60 p-6 md:grid-cols-2">
+                          <div className="grid gap-5 rounded-lg border border-white/70 bg-white/70 p-5 md:grid-cols-2">
                             <MeetingInfo
                               icon={Video}
                               label={locale === "ar" ? "المنصة" : "Platform"}
@@ -662,7 +716,7 @@ export function MeetingsExplorer({
 
                           <Button
                             asChild
-                            className="h-14 w-full rounded-2xl bg-white text-lg font-bold text-primary hover:bg-primary hover:text-white"
+                            className="h-12 w-full rounded-lg bg-secondary text-base font-semibold text-secondary-foreground hover:bg-secondary/90"
                           >
                             <Link href={`/${locale}/meetings/${meeting.id}`}>
                               {labels.join}
@@ -671,7 +725,7 @@ export function MeetingsExplorer({
                         </div>
                       ) : (
                         <>
-                          <div className="grid gap-6 border-t border-slate-50 pt-8 md:grid-cols-2 lg:grid-cols-3">
+                          <div className="grid gap-5 border-t border-border/45 pt-6 md:grid-cols-2 lg:grid-cols-3">
                             <MeetingInfo
                               icon={CalendarDays}
                               label={locale === "ar" ? "الموعد" : "Schedule"}
@@ -689,10 +743,10 @@ export function MeetingsExplorer({
                             />
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-50 pt-6">
-                            <div className="flex flex-wrap gap-4 text-sm font-bold">
+                          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/45 pt-5">
+                            <div className="flex flex-wrap gap-4 text-sm font-semibold">
                               <button
-                                className="text-secondary transition-colors hover:text-primary"
+                                className="text-secondary transition-colors hover:text-foreground"
                                 type="button"
                                 onClick={() =>
                                   firstMapCandidate && changeView("map")
@@ -700,16 +754,10 @@ export function MeetingsExplorer({
                               >
                                 {labels.showOnMap}
                               </button>
-                              <button
-                                className="text-slate-500 transition-colors hover:text-primary"
-                                type="button"
-                              >
-                                {labels.contactCoordinator}
-                              </button>
                             </div>
                             <Button
                               asChild
-                              className="rounded-xl bg-slate-100 px-6 text-slate-900 hover:bg-slate-200"
+                              className="rounded-lg bg-secondary/10 px-6 text-foreground hover:bg-secondary hover:text-white"
                               variant="ghost"
                             >
                               <Link href={`/${locale}/meetings/${meeting.id}`}>
@@ -762,8 +810,8 @@ function PillButton({
       type="button"
       className={
         active
-          ? "rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-white"
-          : "rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-primary hover:text-primary"
+          ? "rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
+          : "rounded-full border border-secondary/15 bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-secondary/40 hover:text-secondary"
       }
       onClick={onClick}
     >
@@ -772,7 +820,7 @@ function PillButton({
   );
 }
 
-function DayBubble({
+function DayButton({
   active,
   children,
   onClick,
@@ -786,8 +834,8 @@ function DayBubble({
       type="button"
       className={
         active
-          ? "flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-medium text-white"
-          : "flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-xs text-slate-600 transition-colors hover:border-primary hover:bg-primary hover:text-white"
+          ? "rounded-lg bg-secondary px-3 py-2.5 text-center text-xs font-semibold text-white shadow-sm"
+          : "rounded-lg border border-secondary/15 bg-white px-3 py-2.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:border-secondary/40 hover:bg-secondary hover:text-white"
       }
       onClick={onClick}
     >
@@ -801,42 +849,27 @@ function MeetingInfo({
   label,
   value,
 }: {
-  icon: typeof CalendarDays;
+  icon: LucideIcon;
   label: string;
   value: string;
 }) {
   return (
     <div className="flex items-start gap-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-primary">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
         <Icon className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-bold text-slate-800">{label}</p>
-        <p className="mt-1 text-xs text-slate-500">{value}</p>
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{value}</p>
       </div>
-    </div>
-  );
-}
-
-function WorkshopFeature({
-  icon: Icon,
-  text,
-}: {
-  icon: typeof MapPin;
-  text: string;
-}) {
-  return (
-    <div className="flex items-center gap-4 text-sm text-slate-600">
-      <Icon className="h-5 w-5 text-secondary" />
-      <span className="font-medium">{text}</span>
     </div>
   );
 }
 
 function formatGender(gender: string | null | undefined, locale: Locale) {
   const labels = {
-    MALE: { ar: "رجال", en: "Men" },
-    FEMALE: { ar: "نساء", en: "Women" },
+    MALE: { ar: "رجال فقط", en: "Male-only" },
+    FEMALE: { ar: "نساء فقط", en: "Women-only" },
     MIXED: { ar: "مختلط", en: "Mixed" },
   } as const;
 
@@ -845,6 +878,106 @@ function formatGender(gender: string | null | undefined, locale: Locale) {
   }
 
   return labels[gender as keyof typeof labels][locale];
+}
+
+const weekdayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const weekdayAliases: Record<string, string> = {
+  SUN: "Sunday",
+  SUNDAY: "Sunday",
+  MON: "Monday",
+  MONDAY: "Monday",
+  TUE: "Tuesday",
+  TUESDAY: "Tuesday",
+  WED: "Wednesday",
+  WEDNESDAY: "Wednesday",
+  THU: "Thursday",
+  THURSDAY: "Thursday",
+  FRI: "Friday",
+  FRIDAY: "Friday",
+  SAT: "Saturday",
+  SATURDAY: "Saturday",
+};
+
+function normalizeWeekday(day: string) {
+  return weekdayAliases[day.trim().toUpperCase()] ?? day;
+}
+
+function sortMeetingsByWeekday(meetings: MeetingDto[]) {
+  return [...meetings].sort((first, second) => {
+    const firstDay = weekdayOrder.indexOf(normalizeWeekday(first.dayOfWeek));
+    const secondDay = weekdayOrder.indexOf(normalizeWeekday(second.dayOfWeek));
+
+    if (firstDay !== secondDay) {
+      return firstDay - secondDay;
+    }
+
+    return first.startTime.localeCompare(second.startTime);
+  });
+}
+
+function formatDayName(day: string, locale: Locale) {
+  const option = meetingDayOptions.find((item) => item.value === normalizeWeekday(day));
+  return option?.label[locale] ?? day;
+}
+
+function getCurrentWeekRange(locale: Locale) {
+  const now = new Date();
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Riyadh",
+    weekday: "long",
+  }).format(now);
+  const riyadhParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Riyadh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: string) => Number(riyadhParts.find((entry) => entry.type === type)?.value);
+  const today = new Date(Date.UTC(part("year"), part("month") - 1, part("day")));
+  const start = addDays(today, -Math.max(weekdayOrder.indexOf(weekday), 0));
+  const end = addDays(start, 6);
+  const formatter = new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-SA", {
+    timeZone: "UTC",
+    dateStyle: "medium",
+  });
+
+  return {
+    from: locale === "ar" ? toDisplayDate(start) : formatter.format(start),
+    to: locale === "ar" ? toDisplayDate(end) : formatter.format(end),
+    fileFrom: toFileDate(start),
+    fileTo: toFileDate(end),
+  };
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function toFileDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function toDisplayDate(date: Date) {
+  return date.toISOString().slice(0, 10).replaceAll("-", "/");
+}
+
+async function loadArabicPdfFont(doc: jsPDF) {
+  const response = await fetch("/fonts/noto-sans-arabic.ttf");
+  const buffer = await response.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+
+  doc.addFileToVFS("noto-sans-arabic.ttf", btoa(binary));
+  doc.addFont("noto-sans-arabic.ttf", "SaudiNAArabic", "normal");
+  doc.addFont("noto-sans-arabic.ttf", "SaudiNAArabic", "bold");
+  doc.setFont("SaudiNAArabic", "normal");
 }
 
 function formatLanguage(language: string | null | undefined, locale: Locale) {

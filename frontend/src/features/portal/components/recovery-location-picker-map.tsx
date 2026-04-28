@@ -12,7 +12,7 @@ import {
 
 const markerIcon = divIcon({
   className: "",
-  html: '<span style="display:flex;height:20px;width:20px;align-items:center;justify-content:center;border-radius:9999px;background:#2D4B5F;border:3px solid white;box-shadow:0 10px 24px rgba(45,75,95,.24)"></span>',
+  html: '<span style="display:flex;height:20px;width:20px;align-items:center;justify-content:center;border-radius:9999px;background:#315c3f;border:3px solid white;box-shadow:0 10px 24px rgba(49,92,63,.24)"></span>',
   iconSize: [20, 20],
   iconAnchor: [10, 10],
 });
@@ -50,7 +50,7 @@ export function RecoveryLocationPickerMap({
   const center = value ?? { lat: 24.7136, lng: 46.6753 };
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-border/30 bg-card editorial-shadow">
+    <div className="overflow-hidden rounded-lg border border-secondary/15 bg-white shadow-sm">
       <MapContainer
         center={center}
         zoom={value ? 13 : 6}

@@ -89,6 +89,54 @@ describe('MeetingsService', () => {
     expect(auditService.log).toHaveBeenCalled();
   });
 
+  it('rejects physical in-service meetings without venue details', async () => {
+    await expect(
+      service.createInServiceMeeting(
+        {
+          committeeId: 'c1',
+          meetingFormat: 'PHYSICAL',
+          titleAr: 'اجتماع خدمة',
+          titleEn: 'Service meeting',
+          meetingDate: '2026-04-27T00:00:00.000Z',
+          startTime: '18:00',
+          mom: 'Minutes content that is long enough',
+          plannedActivities: [],
+        },
+        {
+          id: 'u1',
+          email: 'u@test.com',
+          displayName: 'User',
+          roles: ['COMMITTEE_SECRETARY'],
+          assignments: [],
+        },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('rejects Zoom in-service meetings without Zoom access details', async () => {
+    await expect(
+      service.createInServiceMeeting(
+        {
+          committeeId: 'c1',
+          meetingFormat: 'ZOOM',
+          titleAr: 'اجتماع خدمة',
+          titleEn: 'Service meeting',
+          meetingDate: '2026-04-27T00:00:00.000Z',
+          startTime: '18:00',
+          mom: 'Minutes content that is long enough',
+          plannedActivities: [],
+        },
+        {
+          id: 'u1',
+          email: 'u@test.com',
+          displayName: 'User',
+          roles: ['COMMITTEE_SECRETARY'],
+          assignments: [],
+        },
+      ),
+    ).rejects.toThrow(BadRequestException);
+  });
+
   it('logs recovery meeting list access', async () => {
     meetingsRepository.listRecoveryMeetingsForAreas.mockResolvedValue([
       { id: 'm1' },

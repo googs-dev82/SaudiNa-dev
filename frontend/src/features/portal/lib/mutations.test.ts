@@ -70,10 +70,14 @@ describe("portal mutations", () => {
       createPortalInServiceMeetingAction(
         makeFormData({
           committeeId: "committee-1",
+          meetingFormat: "PHYSICAL",
           titleAr: "اجتماع",
           titleEn: "Meeting",
           meetingDate: "2026-04-08T00:00:00.000Z",
           startTime: "18:00",
+          venueName: "Committee office",
+          city: "Riyadh",
+          address: "Main service office",
           mom: "Minutes content that is long enough",
           plannedActivities: "[invalid",
         }),

@@ -36,7 +36,7 @@ function formatDateTime(value: string, locale: "ar" | "en") {
 
 function statusTone(status: string) {
   if (status === "PUBLISHED") return "bg-emerald-100 text-emerald-800";
-  if (status === "ARCHIVED") return "bg-slate-200 text-slate-700";
+  if (status === "ARCHIVED") return "bg-secondary/10 text-primary";
   return "bg-amber-100 text-amber-800";
 }
 

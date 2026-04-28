@@ -100,9 +100,9 @@ describe('AdminMeetingsController', () => {
       deleted: true,
     });
 
-    await expect(controller.deleteRecovery('m1', user as never)).resolves.toEqual(
-      { id: 'm1', deleted: true },
-    );
+    await expect(
+      controller.deleteRecovery('m1', user as never),
+    ).resolves.toEqual({ id: 'm1', deleted: true });
     expect(meetingsService.deleteRecoveryMeeting).toHaveBeenCalledWith(
       'm1',
       user,

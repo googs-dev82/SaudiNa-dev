@@ -240,12 +240,12 @@ export default async function PortalAdminUserDetailPage({
 
               <form
                 action={updatePortalUserAction}
-                className="grid gap-3 rounded-[1.35rem] bg-white/90 p-4 md:grid-cols-[minmax(0,1fr)_180px_auto]"
+                className="grid gap-3 rounded-lg border border-secondary/10 bg-white/90 p-4 md:grid-cols-[minmax(0,1fr)_180px_auto]"
               >
                 <input name="userId" type="hidden" value={user.id} />
                 <Input defaultValue={user.displayName} name="displayName" required />
                 <select
-                  className="h-12 rounded-xl border border-border/30 bg-white px-4 text-sm text-foreground shadow-sm"
+                  className="h-12 rounded-lg border border-secondary/20 bg-white px-4 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/20"
                   defaultValue={user.status}
                   name="status"
                 >
@@ -266,7 +266,7 @@ export default async function PortalAdminUserDetailPage({
             <div className="space-y-4">
               {userAssignments.length ? (
                 userAssignments.map((assignment) => (
-                  <div key={assignment.id} className="rounded-[1.35rem] bg-white/88 p-4">
+                  <div key={assignment.id} className="rounded-lg border border-secondary/10 bg-white/88 p-4">
                     <div className="mb-3 flex flex-wrap gap-2">
                       <Badge>{formatRoleLabel(assignment.roleCode)}</Badge>
                       <Badge className="bg-accent/70 text-accent-foreground">

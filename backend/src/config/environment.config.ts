@@ -84,10 +84,16 @@ export const environmentConfig = registerAs('app', () => ({
     'https://accounts.google.com/o/oauth2/v2/auth',
   googleTokenUrl:
     process.env['GOOGLE_TOKEN_URL'] ?? 'https://oauth2.googleapis.com/token',
+  googleUserinfoUrl:
+    process.env['GOOGLE_USERINFO_URL'] ??
+    'https://www.googleapis.com/oauth2/v3/userinfo',
   zohoAuthUrl:
     process.env['ZOHO_AUTH_URL'] ?? 'https://accounts.zoho.com/oauth/v2/auth',
   zohoTokenUrl:
     process.env['ZOHO_TOKEN_URL'] ?? 'https://accounts.zoho.com/oauth/v2/token',
+  zohoUserinfoUrl:
+    process.env['ZOHO_USERINFO_URL'] ??
+    'https://accounts.zoho.com/oauth/user/info',
 }));
 
 export type EnvironmentConfig = ReturnType<typeof environmentConfig>;

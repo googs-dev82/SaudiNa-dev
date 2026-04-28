@@ -54,7 +54,7 @@ export function RecoveryMeetingActions({
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="group/button inline-flex size-7 shrink-0 items-center justify-center rounded-[min(var(--radius-md),12px)] text-foreground transition-all outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+          <DropdownMenuTrigger className="group/button inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-foreground transition-all outline-none hover:bg-secondary/10 hover:text-foreground focus-visible:border-secondary/40 focus-visible:ring-3 focus-visible:ring-secondary/20">
             <MoreHorizontal />
             <span className="sr-only">{locale === "ar" ? "إجراءات الاجتماع" : "Meeting actions"}</span>
           </DropdownMenuTrigger>

@@ -163,8 +163,8 @@ export function EventDetail({
         <Link href={backHref ?? (locale === "ar" ? "/ar/events" : "/en/events")}>{backLabel ?? labels.back}</Link>
       </Button>
 
-      <Card className="border-border/60 bg-white/95 shadow-sm">
-        <div className="border-b border-border/50 px-6 py-5">
+      <Card className="rounded-lg border-secondary/15 bg-white/95 shadow-sm">
+        <div className="border-b border-secondary/10 px-6 py-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <Badge>{getEventVisibilityLabel(locale, event.visibility)}</Badge>
@@ -265,7 +265,7 @@ export function EventDetail({
             <Info title={labels.notifications}>
               <div className="flex flex-col gap-3">
                 {event.notificationLogs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="rounded-2xl bg-muted/40 p-4">
+                  <div key={log.id} className="rounded-lg border border-secondary/10 bg-secondary/5 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="text-sm font-medium text-primary">{log.notificationType}</div>
                       <Badge variant={log.status === "FAILED" ? "destructive" : "secondary"}>{log.status}</Badge>
@@ -284,7 +284,7 @@ export function EventDetail({
             <Info title={labels.audit}>
               <div className="flex flex-col gap-3">
                 {auditLogs.map((log) => (
-                  <div key={log.id} className="rounded-2xl bg-muted/40 p-4">
+                  <div key={log.id} className="rounded-lg border border-secondary/10 bg-secondary/5 p-4">
                     <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                       {new Date(log.createdAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}
                     </div>
@@ -302,7 +302,7 @@ export function EventDetail({
 
 function Info({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl bg-muted/20 p-5">
+    <section className="rounded-lg border border-secondary/10 bg-secondary/5 p-5">
       <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-muted-foreground">{title}</h2>
       <div className="mt-4 flex flex-col gap-3">{children}</div>
     </section>
@@ -317,7 +317,7 @@ function Row({
   value: ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-border/50 py-2 last:border-b-0">
+    <div className="flex items-start justify-between gap-4 border-b border-secondary/10 py-2 last:border-b-0">
       <div className="text-sm text-muted-foreground">{label}</div>
       <div className="max-w-[60%] text-right text-sm font-medium text-primary">{value}</div>
     </div>

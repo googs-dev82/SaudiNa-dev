@@ -1,5 +1,10 @@
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { ShieldCheck } from "lucide-react";
+import {
+  GovernanceEmptyState,
+  GovernancePageHeader,
+  GovernanceSection,
+} from "@/features/portal/components/governance-ui";
 import { portalNavItems } from "@/features/portal/lib/navigation";
 import type { PortalLocale } from "@/features/portal/lib/portal-locale";
 import type { PortalUser } from "@/types/portal";
@@ -34,37 +39,42 @@ export function PortalPage({
           };
 
     return (
-      <Card className="bg-white">
-        <CardContent className="p-8">
-          <h2 className="text-2xl font-bold text-primary">{copy.title}</h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">
-            {copy.description}
-          </p>
-        </CardContent>
-      </Card>
+      <GovernanceSection title={copy.title} description={copy.description}>
+        <GovernanceEmptyState title={copy.title} description={copy.description} />
+      </GovernanceSection>
     );
   }
 
   const copy =
     locale === "ar"
       ? {
+          eyebrow: "مساحة عمل",
+          ready: "المسار جاهز",
           body:
-            "هذه الشاشة مهيأة ومحمية. الخطوة التالية هي ربط هذا المسار بسير العمل الخلفي والاستعلامات المقيدة الخاصة بالمستخدم المسجل الدخول.",
+            "هذه المساحة محمية حسب الدور والنطاق. استخدم لوحة التحكم للانتقال إلى سير العمل المتاح، أو اربط هذه الصفحة بسير العمل التفصيلي عند اكتمال المتطلبات الخلفية.",
         }
       : {
+          eyebrow: "Workspace",
+          ready: "Route ready",
           body:
-            "This screen is scaffolded and protected. The next implementation step is to bind this route to the corresponding backend workflows and scoped queries for the signed-in user.",
+            "This workspace is protected by role and scope. Use the dashboard to move into available workflows, or bind this page to its detailed workflow when the backend requirements are ready.",
         };
 
   return (
-    <Card className="bg-white">
-      <CardContent className="p-8">
-        <h2 className="text-3xl font-bold text-primary">{item.label[locale]}</h2>
-        <p className="mt-3 max-w-2xl text-base leading-8 text-muted-foreground">
-          {item.description[locale]}
-        </p>
-        <p className="mt-6 text-sm leading-7 text-muted-foreground">{copy.body}</p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <GovernancePageHeader
+        eyebrow={copy.eyebrow}
+        title={item.label[locale]}
+        description={item.description[locale]}
+      />
+      <GovernanceSection title={copy.ready} description={copy.body}>
+        <div className="flex items-start gap-4 rounded-lg border border-secondary/15 bg-secondary/5 p-5">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
+            <ShieldCheck className="size-5" />
+          </div>
+          <p className="text-sm leading-7 text-muted-foreground">{copy.body}</p>
+        </div>
+      </GovernanceSection>
+    </div>
   );
 }

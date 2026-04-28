@@ -74,8 +74,10 @@ export class IdentityProviderService {
   ): Promise<VerifiedIdentityProfile> {
     const endpoint =
       provider === 'GOOGLE'
-        ? this.configService.get<string>('GOOGLE_USERINFO_URL')
-        : this.configService.get<string>('ZOHO_USERINFO_URL');
+        ? this.configService.get<string>('app.googleUserinfoUrl') ??
+          this.configService.get<string>('GOOGLE_USERINFO_URL')
+        : this.configService.get<string>('app.zohoUserinfoUrl') ??
+          this.configService.get<string>('ZOHO_USERINFO_URL');
 
     if (!endpoint) {
       throw new UnauthorizedException(

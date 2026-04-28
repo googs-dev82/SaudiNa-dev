@@ -86,7 +86,7 @@ export function EventRowActions({
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label="Open event actions"
-          className="inline-flex h-9 items-center justify-center rounded-xl border border-border/60 bg-background px-3 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring/20"
+          className="inline-flex h-9 items-center justify-center rounded-lg border border-secondary/15 bg-white px-3 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-secondary/10 focus:outline-none focus:ring-2 focus:ring-secondary/20"
           type="button"
         >
           <MoreHorizontalIcon data-icon="inline-start" />

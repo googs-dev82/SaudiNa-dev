@@ -20,6 +20,7 @@ import {
 } from '../../common/domain.constants.js';
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+const IN_SERVICE_MEETING_FORMATS = ['PHYSICAL', 'ZOOM'] as const;
 
 export class CreateRecoveryMeetingDto {
   @IsUUID()
@@ -97,6 +98,9 @@ export class CreateInServiceMeetingDto {
   @IsUUID()
   committeeId!: string;
 
+  @IsIn(IN_SERVICE_MEETING_FORMATS)
+  meetingFormat!: (typeof IN_SERVICE_MEETING_FORMATS)[number];
+
   @IsString()
   @MinLength(2)
   titleAr!: string;
@@ -118,6 +122,34 @@ export class CreateInServiceMeetingDto {
   @IsOptional()
   @Matches(TIME_PATTERN)
   endTime?: string;
+
+  @IsOptional()
+  @IsString()
+  venueName?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  district?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  zoomJoinUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  zoomMeetingId?: string;
+
+  @IsOptional()
+  @IsString()
+  zoomPasscode?: string;
 
   @IsString()
   @MinLength(10)

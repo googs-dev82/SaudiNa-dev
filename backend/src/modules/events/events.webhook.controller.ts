@@ -1,4 +1,11 @@
-import { BadRequestException, Body, Controller, Headers, Post, Req } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -29,7 +36,8 @@ export class EventsWebhookController {
     signature: string | undefined,
     timestamp: string | undefined,
   ) {
-    const webhookSecret = this.configService.get<string>('app.zoomWebhookSecret') ?? '';
+    const webhookSecret =
+      this.configService.get<string>('app.zoomWebhookSecret') ?? '';
 
     if (!webhookSecret) {
       throw new BadRequestException('Zoom webhook secret is not configured.');
@@ -44,7 +52,9 @@ export class EventsWebhookController {
       .update(signedPayload)
       .digest('hex');
 
-    const provided = signature.startsWith('v0=') ? signature.slice(3) : signature;
+    const provided = signature.startsWith('v0=')
+      ? signature.slice(3)
+      : signature;
 
     if (
       expected.length !== provided.length ||

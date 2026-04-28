@@ -50,7 +50,7 @@ export function PortalSiteHeader({
   const breadcrumb = buildBreadcrumb(pathname, items, t("breadcrumb.portal"));
 
   return (
-    <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center border-b border-border/50 bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center border-b border-secondary/15 bg-background/92 backdrop-blur">
       <div className="flex w-full items-center gap-3 px-4 py-3 md:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <SidebarTrigger className="shrink-0" />
@@ -102,7 +102,7 @@ export function PortalSiteHeader({
             <Input
               aria-label={locale === "ar" ? "البحث في البوابة" : "Global portal search"}
               className={cn(
-                "w-64",
+                "w-64 rounded-lg border-secondary/20 bg-white shadow-none focus-visible:ring-secondary/20",
                 isRtl ? "pr-9 text-right" : "pl-9",
                 pathname.startsWith("/portal/admin") && "lg:w-80",
               )}

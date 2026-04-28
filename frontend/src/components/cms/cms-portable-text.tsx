@@ -45,7 +45,7 @@ const components: PortableTextComponents = {
       const src = "width" in imageBuilder ? imageBuilder.width(1200).height(700).url() : imageBuilder.url();
       const alt = value?.alt?.en ?? "SaudiNA editorial image";
       return (
-        <div className="overflow-hidden rounded-3xl">
+        <div className="overflow-hidden rounded-lg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt={alt} className="h-auto w-full object-cover" loading="lazy" src={src} />
         </div>
@@ -61,7 +61,7 @@ const components: PortableTextComponents = {
       const title = value?.title?.en ?? "YouTube video";
 
       return (
-        <div className="relative my-6 aspect-video w-full overflow-hidden rounded-3xl bg-black editorial-shadow">
+        <div className="relative my-6 aspect-video w-full overflow-hidden rounded-lg bg-black editorial-shadow">
           <iframe
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -78,7 +78,7 @@ const components: PortableTextComponents = {
       if (!url) return null;
 
       return (
-        <div className="relative my-6 overflow-hidden rounded-3xl bg-black editorial-shadow">
+        <div className="relative my-6 overflow-hidden rounded-lg bg-black editorial-shadow">
           <video
             className="w-full"
             controls
@@ -95,7 +95,7 @@ const components: PortableTextComponents = {
       if (!url) return null;
 
       return (
-        <div className="my-6 rounded-2xl bg-muted/30 p-6 editorial-shadow">
+        <div className="my-6 rounded-lg border border-secondary/10 bg-secondary/5 p-6 editorial-shadow">
           {value?.title?.en ? <p className="mb-4 font-semibold text-primary">{value.title.en}</p> : null}
           <audio className="w-full" controls preload="metadata" src={url} />
         </div>
@@ -108,7 +108,7 @@ const components: PortableTextComponents = {
 
       return (
         <a
-          className="my-4 inline-flex items-center gap-3 rounded-xl border border-secondary/40 bg-secondary/10 px-5 py-3 font-medium text-primary transition hover:bg-secondary/20"
+          className="my-4 inline-flex items-center gap-3 rounded-lg border border-secondary/40 bg-secondary/10 px-5 py-3 font-medium text-primary transition hover:bg-secondary/20"
           download
           href={url}
           rel="noreferrer"

@@ -22,11 +22,50 @@ interface NearbyMeetingRow {
   distanceMeters: number;
 }
 
+const DAY_VARIANTS: Record<string, string[]> = {
+  SUNDAY: ['Sunday', 'SUNDAY', 'SUN'],
+  MONDAY: ['Monday', 'MONDAY', 'MON'],
+  TUESDAY: ['Tuesday', 'TUESDAY', 'TUE'],
+  WEDNESDAY: ['Wednesday', 'WEDNESDAY', 'WED'],
+  THURSDAY: ['Thursday', 'THURSDAY', 'THU'],
+  FRIDAY: ['Friday', 'FRIDAY', 'FRI'],
+  SATURDAY: ['Saturday', 'SATURDAY', 'SAT'],
+};
+
+function getDayVariants(dayOfWeek?: string) {
+  if (!dayOfWeek) {
+    return undefined;
+  }
+
+  return DAY_VARIANTS[dayOfWeek.trim().toUpperCase()] ?? [dayOfWeek];
+}
+
 @Injectable()
 export class MeetingsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  private buildInServiceMeetingData(
+    input: CreateInServiceMeetingDto | UpdateInServiceMeetingDto,
+  ) {
+    const isPhysical = input.meetingFormat === 'PHYSICAL';
+
+    return {
+      ...input,
+      venueName: isPhysical ? input.venueName : null,
+      city: isPhysical ? input.city : null,
+      district: isPhysical ? input.district : null,
+      address: isPhysical ? input.address : null,
+      zoomJoinUrl: isPhysical ? null : input.zoomJoinUrl,
+      zoomMeetingId: isPhysical ? null : input.zoomMeetingId,
+      zoomPasscode: isPhysical ? null : input.zoomPasscode,
+      meetingDate: new Date(input.meetingDate),
+      plannedActivities: input.plannedActivities as Prisma.InputJsonValue,
+    };
+  }
+
   private buildRecoveryWhere(query: PublicMeetingSearchQueryDto) {
+    const dayVariants = getDayVariants(query.dayOfWeek);
+
     return {
       status: 'PUBLISHED' as const,
       areaId: query.areaId,
@@ -36,7 +75,7 @@ export class MeetingsRepository {
       district: query.district
         ? { contains: query.district, mode: 'insensitive' as const }
         : undefined,
-      dayOfWeek: query.dayOfWeek,
+      dayOfWeek: dayVariants ? { in: dayVariants } : undefined,
       gender: query.gender,
       language: query.language,
       isOnline: query.isOnline,
@@ -120,8 +159,10 @@ export class MeetingsRepository {
     if (query.city) {
       conditions.push(Prisma.sql`rm."city" ILIKE ${`%${query.city}%`}`);
     }
-    if (query.dayOfWeek) {
-      conditions.push(Prisma.sql`rm."dayOfWeek" = ${query.dayOfWeek}`);
+    const dayVariants = getDayVariants(query.dayOfWeek);
+
+    if (dayVariants) {
+      conditions.push(Prisma.sql`rm."dayOfWeek" IN (${Prisma.join(dayVariants)})`);
     }
     if (query.gender) {
       conditions.push(Prisma.sql`rm."gender" = ${query.gender}`);
@@ -173,9 +214,7 @@ export class MeetingsRepository {
   ) {
     return this.prisma.inServiceMeeting.create({
       data: {
-        ...input,
-        meetingDate: new Date(input.meetingDate),
-        plannedActivities: input.plannedActivities as Prisma.InputJsonValue,
+        ...this.buildInServiceMeetingData(input),
         createdById,
       },
     });
@@ -184,11 +223,7 @@ export class MeetingsRepository {
   updateInServiceMeeting(id: string, input: UpdateInServiceMeetingDto) {
     return this.prisma.inServiceMeeting.update({
       where: { id },
-      data: {
-        ...input,
-        meetingDate: new Date(input.meetingDate),
-        plannedActivities: input.plannedActivities as Prisma.InputJsonValue,
-      },
+      data: this.buildInServiceMeetingData(input),
     });
   }
 

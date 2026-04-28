@@ -90,7 +90,7 @@ export function EventDirectory({ locale, events, title, description }: EventDire
 
   return (
     <main className="bg-background">
-      <section className="border-b border-border/60 bg-gradient-to-br from-primary/[0.05] via-background to-secondary/[0.04]">
+      <section className="border-b border-secondary/10 bg-[linear-gradient(180deg,#fdfcf9_0%,#f4f7ef_100%)]">
         <div className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8">
           <span className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary">{labels.heroKicker}</span>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-primary md:text-5xl">{title}</h1>
@@ -99,7 +99,7 @@ export function EventDirectory({ locale, events, title, description }: EventDire
       </section>
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8">
-        <Card className="border-border/60 bg-card/95 shadow-sm">
+        <Card className="rounded-lg border-secondary/15 bg-card/95 shadow-sm">
           <CardContent className="grid gap-4 p-4 md:grid-cols-[minmax(0,1fr)_220px_auto_auto] md:items-end">
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">{labels.search}</label>
@@ -120,8 +120,8 @@ export function EventDirectory({ locale, events, title, description }: EventDire
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={commitFilters} disabled={isPending}>{labels.apply}</Button>
-            <Button variant="outline" onClick={clearFilters} disabled={isPending}>{labels.clear}</Button>
+            <Button className="rounded-lg" onClick={commitFilters} disabled={isPending}>{labels.apply}</Button>
+            <Button className="rounded-lg border-secondary/20 text-primary hover:bg-secondary/5" variant="outline" onClick={clearFilters} disabled={isPending}>{labels.clear}</Button>
           </CardContent>
         </Card>
 
@@ -130,14 +130,14 @@ export function EventDirectory({ locale, events, title, description }: EventDire
             <EmptyState title={labels.noResults} description={labels.noResultsText} />
           ) : (
             filteredEvents.map((event) => (
-              <Card key={event.id} className="border-border/60 bg-white/95 shadow-sm">
-                <div className="flex flex-col gap-3 border-b border-border/50 px-6 py-5 md:flex-row md:items-start md:justify-between">
+              <Card key={event.id} className="rounded-lg border-secondary/15 bg-white/95 shadow-sm transition hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-md">
+                <div className="flex flex-col gap-3 border-b border-secondary/10 px-6 py-5 md:flex-row md:items-start md:justify-between">
                   <div>
                     <Badge variant="outline">{getEventVisibilityLabel(locale, event.visibility)}</Badge>
                     <h2 className="mt-3 text-2xl font-semibold text-primary">{event.title}</h2>
                     <p className="mt-2 text-sm leading-7 text-muted-foreground">{event.description ?? (locale === "ar" ? "لا يوجد وصف بعد." : "No description provided yet.")}</p>
                   </div>
-                  <Button asChild variant="outline">
+                  <Button className="rounded-lg border-secondary/20 text-primary hover:bg-secondary/5" asChild variant="outline">
                     <Link href={`/${locale}/events/${event.id}`}>{labels.view}</Link>
                   </Button>
                 </div>
@@ -158,7 +158,7 @@ export function EventDirectory({ locale, events, title, description }: EventDire
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-muted/40 p-4">
+    <div className="rounded-lg border border-secondary/10 bg-secondary/5 p-4">
       <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">{label}</div>
       <div className="mt-2 text-sm font-medium text-primary">{value}</div>
     </div>

@@ -45,7 +45,8 @@ export function ProviderCallback({ provider }: { provider: "GOOGLE" | "ZOHO" }) 
       });
 
       if (!response.ok) {
-        setMessage("We could not complete sign-in. Confirm the provider callback is passing a usable token or trusted claims.");
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+        setMessage(payload?.message ?? "We could not complete sign-in. Confirm the provider callback is passing a usable token or trusted claims.");
         return;
       }
 

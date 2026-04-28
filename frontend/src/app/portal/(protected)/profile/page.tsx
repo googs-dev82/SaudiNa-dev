@@ -28,7 +28,7 @@ import type { PortalAssignment } from "@/types/portal";
 
 function statusTone(status: string) {
   if (status === "ACTIVE") return "bg-emerald-100 text-emerald-800";
-  if (status === "INACTIVE") return "bg-slate-200 text-slate-700";
+  if (status === "INACTIVE") return "bg-secondary/10 text-primary";
   return "bg-amber-100 text-amber-800";
 }
 

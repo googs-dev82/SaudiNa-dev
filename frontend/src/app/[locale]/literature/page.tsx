@@ -10,7 +10,10 @@ export default async function LiteraturePage({ params }: { params: Promise<{ loc
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 md:px-8">
-      <h1 className="text-4xl font-bold text-primary">{locale === "ar" ? "الأدبيات والمحتوى التحريري" : "Literature and editorial content"}</h1>
+      <div className="max-w-3xl">
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-secondary">{locale === "ar" ? "قراءات" : "Reading"}</p>
+        <h1 className="mt-3 text-4xl font-bold text-primary">{locale === "ar" ? "الأدبيات والمحتوى التحريري" : "Literature and editorial content"}</h1>
+      </div>
       <div className="mt-10 grid gap-6 md:grid-cols-3">
         {articles.map((article) => {
           const src = article.image?.asset?._ref?.startsWith("http")
@@ -20,7 +23,7 @@ export default async function LiteraturePage({ params }: { params: Promise<{ loc
               : null;
 
           return (
-            <article key={article.id} className="overflow-hidden rounded-3xl border border-border/30 bg-white editorial-shadow">
+            <article key={article.id} className="overflow-hidden rounded-lg border border-secondary/15 bg-white editorial-shadow transition hover:-translate-y-0.5 hover:border-secondary/35 hover:shadow-md">
               <div className="relative h-56 w-full">
                 {src ? <Image alt={getLocalizedValue(article.title, locale) ?? "Article image"} className="object-cover" fill sizes="(max-width: 768px) 100vw, 33vw" src={src} /> : null}
               </div>

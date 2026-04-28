@@ -8,9 +8,9 @@ import { CmsPortableText } from "./cms-portable-text";
 import { getSanityFileUrl } from "@/sanity/lib/file";
 
 const heroThemeClass: Record<string, string> = {
-  ocean: "bg-background",
+  ocean: "bg-[linear-gradient(180deg,#fdfcf9_0%,#f4f7ef_100%)]",
   sand: "bg-accent/25",
-  sage: "bg-muted/40",
+  sage: "bg-secondary/[0.06]",
 };
 
 export function CmsPageSections({ sections, locale }: { sections: CmsPageSection[]; locale: Locale }) {
@@ -18,11 +18,13 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
     <div>
       {sections.map((section) => {
         switch (section._type) {
-          case "heroBlock":
+          case "heroBlock": {
+            const hasHeroImage = Boolean(section.image?.asset?._ref);
+
             return (
-              <section key={section._key} className={`relative overflow-hidden ${heroThemeClass[section.theme ?? "ocean"]}`}>
-                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                  <div className="space-y-6">
+              <section key={section._key} className={`relative overflow-hidden border-b border-secondary/10 ${heroThemeClass[section.theme ?? "ocean"]}`}>
+                <div className={hasHeroImage ? "mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center" : "mx-auto max-w-4xl px-4 py-20 text-center md:px-8"}>
+                  <div className={hasHeroImage ? "space-y-6" : "space-y-6"}>
                     {section.eyebrow ? (
                       <p className="text-xs font-bold uppercase tracking-[0.3em] text-secondary">
                         {getLocalizedValue(section.eyebrow, locale)}
@@ -32,15 +34,15 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                       {getLocalizedValue(section.title, locale)}
                     </h1>
                     {section.body ? (
-                      <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
+                      <p className={hasHeroImage ? "max-w-2xl text-lg leading-8 text-muted-foreground" : "mx-auto max-w-2xl text-lg leading-8 text-muted-foreground"}>
                         {getLocalizedValue(section.body, locale)}
                       </p>
                     ) : null}
-                    <div className="flex flex-wrap gap-4">
+                    <div className={hasHeroImage ? "flex flex-wrap gap-4" : "flex flex-wrap justify-center gap-4"}>
                       {section.primaryCta ? (
                         section.primaryCta.kind === "external" ? (
                           <a
-                            className="hero-gradient inline-flex h-14 items-center rounded-xl px-8 text-base font-medium text-primary-foreground"
+                            className="hero-gradient inline-flex h-14 items-center rounded-lg px-8 text-base font-medium text-primary-foreground shadow-sm transition hover:opacity-95"
                             href={getCmsHref(section.primaryCta, locale)}
                             rel={section.primaryCta.openInNewTab ? "noreferrer" : undefined}
                             target={section.primaryCta.openInNewTab ? "_blank" : undefined}
@@ -49,7 +51,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                           </a>
                         ) : (
                           <Link
-                            className="hero-gradient inline-flex h-14 items-center rounded-xl px-8 text-base font-medium text-primary-foreground"
+                            className="hero-gradient inline-flex h-14 items-center rounded-lg px-8 text-base font-medium text-primary-foreground shadow-sm transition hover:opacity-95"
                             href={getCmsHref(section.primaryCta, locale)}
                           >
                             {getLocalizedValue(section.primaryCta.label, locale)}
@@ -59,7 +61,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                       {section.secondaryCta ? (
                         section.secondaryCta.kind === "external" ? (
                           <a
-                            className="inline-flex h-14 items-center rounded-xl border border-border/40 bg-white px-8 text-base font-medium text-primary"
+                            className="inline-flex h-14 items-center rounded-lg border border-secondary/20 bg-white px-8 text-base font-medium text-primary shadow-sm transition hover:border-secondary/40 hover:bg-secondary/5"
                             href={getCmsHref(section.secondaryCta, locale)}
                             rel={section.secondaryCta.openInNewTab ? "noreferrer" : undefined}
                             target={section.secondaryCta.openInNewTab ? "_blank" : undefined}
@@ -68,7 +70,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                           </a>
                         ) : (
                           <Link
-                            className="inline-flex h-14 items-center rounded-xl border border-border/40 bg-white px-8 text-base font-medium text-primary"
+                            className="inline-flex h-14 items-center rounded-lg border border-secondary/20 bg-white px-8 text-base font-medium text-primary shadow-sm transition hover:border-secondary/40 hover:bg-secondary/5"
                             href={getCmsHref(section.secondaryCta, locale)}
                           >
                             {getLocalizedValue(section.secondaryCta.label, locale)}
@@ -77,18 +79,21 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                       ) : null}
                     </div>
                   </div>
-                  <div className="relative min-h-[320px] overflow-hidden rounded-[2rem] bg-white/50 editorial-shadow">
-                    <CmsImageView
-                      className="object-cover"
-                      fill
-                      image={section.image}
-                      locale={locale}
-                      sizes="(max-width: 1024px) 100vw, 42vw"
-                    />
-                  </div>
+                  {hasHeroImage ? (
+                    <div className="relative min-h-[320px] overflow-hidden rounded-lg border border-white/70 bg-white/50 editorial-shadow">
+                      <CmsImageView
+                        className="object-cover"
+                        fill
+                        image={section.image}
+                        locale={locale}
+                        sizes="(max-width: 1024px) 100vw, 42vw"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </section>
             );
+          }
           case "richTextBlock":
             return (
               <section key={section._key} className="mx-auto max-w-4xl px-4 py-16 md:px-8">
@@ -118,7 +123,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                 <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                   {imageFirst ? (
                     <>
-                      <div className="relative min-h-[320px] overflow-hidden rounded-3xl editorial-shadow">
+                      <div className="relative min-h-[320px] overflow-hidden rounded-lg border border-secondary/10 editorial-shadow">
                         <CmsImageView className="object-cover" fill image={section.image} locale={locale} sizes="(max-width: 1024px) 100vw, 50vw" />
                       </div>
                       {content}
@@ -126,7 +131,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                   ) : (
                     <>
                       {content}
-                      <div className="relative min-h-[320px] overflow-hidden rounded-3xl editorial-shadow">
+                      <div className="relative min-h-[320px] overflow-hidden rounded-lg border border-secondary/10 editorial-shadow">
                         <CmsImageView className="object-cover" fill image={section.image} locale={locale} sizes="(max-width: 1024px) 100vw, 50vw" />
                       </div>
                     </>
@@ -138,7 +143,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
           case "ctaBlock":
             return (
               <section key={section._key} className="mx-auto max-w-7xl px-4 py-16 md:px-8">
-                <div className="soft-gradient-blue rounded-3xl border border-white/50 p-10 editorial-shadow md:p-16">
+                <div className="soft-gradient-blue rounded-lg border border-secondary/15 p-10 editorial-shadow md:p-16">
                   {section.eyebrow ? (
                     <p className="text-xs font-bold uppercase tracking-[0.3em] text-secondary">
                       {getLocalizedValue(section.eyebrow, locale)}
@@ -154,7 +159,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                     {section.actions.map((action) => (
                       <CmsLinkText
                         key={`${action.href}-${action.label.en}`}
-                        className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-primary-foreground hover:bg-primary/90"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
                         link={action}
                         locale={locale}
                       />
@@ -189,7 +194,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                   ) : null}
                 </div>
                 {videoUrl && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] bg-black editorial-shadow">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black editorial-shadow">
                     {isYouTube ? (
                       <iframe
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -217,7 +222,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
             
             return (
               <section key={section._key} className="mx-auto max-w-3xl px-4 py-16 md:px-8">
-                <div className="rounded-3xl bg-muted/30 p-8 editorial-shadow md:p-12">
+                <div className="rounded-lg border border-secondary/10 bg-secondary/5 p-8 editorial-shadow md:p-12">
                   <div className="mb-8 space-y-4">
                     {section.title ? (
                       <h2 className="text-3xl font-bold text-primary">{getLocalizedValue(section.title, locale)}</h2>
@@ -236,7 +241,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
             
             return (
               <section key={section._key} className="mx-auto max-w-4xl px-4 py-16 md:px-8">
-                <div className="flex flex-col items-center justify-between gap-8 rounded-3xl border border-secondary/20 bg-secondary/5 p-8 editorial-shadow md:flex-row md:p-12">
+                <div className="flex flex-col items-center justify-between gap-8 rounded-lg border border-secondary/20 bg-secondary/5 p-8 editorial-shadow md:flex-row md:p-12">
                   <div className="max-w-xl space-y-4">
                     {section.title ? (
                       <h2 className="text-3xl font-bold text-primary">{getLocalizedValue(section.title, locale)}</h2>
@@ -247,7 +252,7 @@ export function CmsPageSections({ sections, locale }: { sections: CmsPageSection
                   </div>
                   {url && (
                     <a
-                      className="inline-flex shrink-0 items-center gap-3 rounded-xl bg-secondary px-8 py-4 font-semibold text-secondary-foreground transition hover:opacity-90"
+                      className="inline-flex shrink-0 items-center gap-3 rounded-lg bg-secondary px-8 py-4 font-semibold text-secondary-foreground shadow-sm transition hover:opacity-90"
                       download
                       href={url}
                       rel="noreferrer"

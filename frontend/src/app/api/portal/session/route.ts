@@ -33,7 +33,14 @@ export async function POST(request: NextRequest) {
   }).catch(() => null);
 
   if (!response?.ok) {
-    return NextResponse.json({ ok: false, message: "Unable to authenticate user." }, { status: 401 });
+    const errorPayload = (await response?.json().catch(() => null)) as {
+      message?: string | string[];
+    } | null;
+    const message = Array.isArray(errorPayload?.message)
+      ? errorPayload.message.join(" ")
+      : errorPayload?.message;
+
+    return NextResponse.json({ ok: false, message: message ?? "Unable to authenticate user." }, { status: 401 });
   }
 
   const result = (await response.json()) as AuthExchangeResponse;

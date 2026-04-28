@@ -48,7 +48,7 @@ function reportStatusTone(status: string) {
     case "APPROVED":
       return "bg-teal-100 text-teal-800";
     default:
-      return "bg-slate-100 text-slate-700";
+      return "bg-secondary/10 text-primary";
   }
 }
 
@@ -178,7 +178,7 @@ export default async function PortalReportsPage() {
           <form action={createPortalReportAction} className="grid gap-4">
             <select
               name="type"
-              className="h-12 rounded-xl border border-border/50 bg-white px-4 text-sm text-foreground shadow-sm"
+              className="h-12 rounded-lg border border-secondary/20 bg-white px-4 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/20"
               defaultValue="MEETING_SUMMARY"
             >
               {reportTypes.map((type) => (
@@ -256,7 +256,7 @@ export default async function PortalReportsPage() {
                   ]}
                 />
 
-                <div className="flex flex-wrap gap-3 border-t border-border/20 pt-6">
+                <div className="flex flex-wrap gap-3 border-t border-secondary/10 pt-6">
                   {report.approvalRequired && report.status === "DRAFT" ? (
                     <PortalConfirmAction
                       action={submitPortalReportAction}

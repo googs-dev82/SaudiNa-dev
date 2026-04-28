@@ -18,7 +18,7 @@ export function GovernancePageHeader({
   breadcrumb?: string[];
 }) {
   return (
-    <Card className="overflow-hidden border-0 bg-[linear-gradient(135deg,rgba(20,38,53,0.96),rgba(36,74,98,0.86))] text-white shadow-[0_30px_80px_rgba(20,38,53,0.20)]">
+    <Card className="overflow-hidden rounded-lg border border-secondary/15 bg-[linear-gradient(135deg,#315c3f_0%,#588157_100%)] text-white shadow-sm">
       <CardContent className="p-6 md:p-8">
         {breadcrumb?.length ? (
           <div className="mb-5 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/65">
@@ -78,11 +78,11 @@ export function GovernanceMetricCard({
   trend?: { value: string; label: string; positive?: boolean };
 }) {
   return (
-    <Card className="border border-border/30 bg-white shadow-sm">
-      <CardContent className="p-6">
+    <Card className="rounded-lg border border-secondary/15 bg-white shadow-sm transition hover:border-secondary/35 hover:shadow-md">
+      <CardContent className="p-5">
         <div className="flex flex-row items-center justify-between space-y-0 pb-2">
           <p className="text-sm font-medium tracking-tight text-muted-foreground">{label}</p>
-          {icon ? <div className="text-muted-foreground">{icon}</div> : null}
+          {icon ? <div className="rounded-lg bg-secondary/10 p-2 text-secondary">{icon}</div> : null}
         </div>
         <div className="flex flex-col gap-1">
           <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
@@ -116,9 +116,9 @@ export function GovernanceSection({
   className?: string;
 }) {
   return (
-    <Card className={cn("border-0 bg-white/96", className)}>
+    <Card className={cn("rounded-lg border border-secondary/15 bg-white shadow-sm", className)}>
       <CardContent className="p-6 md:p-7">
-          <div className="flex min-w-0 flex-col gap-4 border-b border-border/30 pb-5 md:flex-row md:items-end md:justify-between">
+          <div className="flex min-w-0 flex-col gap-4 border-b border-secondary/10 pb-5 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0 max-w-2xl">
             <h2 className="break-words text-2xl font-semibold leading-tight tracking-tight text-primary">{title}</h2>
             {description ? (
@@ -141,7 +141,7 @@ export function GovernanceEmptyState({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.75rem] bg-muted/30 px-6 py-12 text-center">
+    <div className="rounded-lg border border-dashed border-secondary/25 bg-secondary/5 px-6 py-12 text-center">
       <h3 className="text-xl font-semibold tracking-tight text-primary">{title}</h3>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
         {description}
@@ -162,7 +162,7 @@ export function GovernanceListCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[1.75rem] bg-muted/18 p-5 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.04)]">
+    <div className="rounded-lg border border-secondary/10 bg-secondary/5 p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
         <h3 className="break-words text-xl font-semibold tracking-tight text-primary">{title}</h3>
@@ -234,11 +234,11 @@ export function GovernanceTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] bg-muted/18">
+    <div className="overflow-hidden rounded-lg border border-secondary/10 bg-secondary/5">
       <div className="overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-0">
           <thead>
-            <tr className="text-left">
+            <tr className="bg-secondary/8 text-left">
               {columns.map((column) => (
                 <th
                   key={column}
@@ -266,7 +266,7 @@ export function GovernanceRow({
   className?: string;
 }) {
   return (
-    <tr className={cn("transition-colors hover:bg-white/70", className)}>
+    <tr className={cn("transition-colors hover:bg-white/80", className)}>
       {children}
     </tr>
   );
@@ -280,7 +280,7 @@ export function GovernanceCell({
   className?: string;
 }) {
   return (
-    <td className={cn("border-b border-border/25 px-5 py-4 align-top text-sm", className)}>
+    <td className={cn("border-b border-secondary/10 bg-white/55 px-5 py-4 align-top text-sm", className)}>
       {children}
     </td>
   );
@@ -294,6 +294,6 @@ export function GovernancePill({
   className?: string;
 }) {
   return (
-    <Badge className={cn("bg-white text-primary shadow-sm", className)}>{children}</Badge>
+    <Badge className={cn("border border-secondary/15 bg-white text-primary shadow-sm", className)}>{children}</Badge>
   );
 }

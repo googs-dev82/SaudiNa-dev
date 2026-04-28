@@ -188,7 +188,7 @@ export default async function PortalContactPage() {
                 </p>
 
                 {submission.internalNotes ? (
-                  <div className="rounded-[1.35rem] bg-white/88 p-4">
+                  <div className="rounded-lg border border-secondary/10 bg-white/88 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-secondary/80">
                       {copy.internalNotes}
                     </p>
@@ -200,7 +200,7 @@ export default async function PortalContactPage() {
 
                 <form
                   action={updatePortalContactSubmissionAction}
-                  className="grid gap-4 rounded-[1.5rem] bg-white/92 p-5"
+                  className="grid gap-4 rounded-lg border border-secondary/10 bg-white/92 p-5"
                 >
                   <input
                     name="submissionId"
@@ -208,7 +208,7 @@ export default async function PortalContactPage() {
                     value={submission.id}
                   />
                   <select
-                    className="h-12 rounded-xl border border-border/50 bg-white px-4 text-sm text-foreground shadow-sm"
+                    className="h-12 rounded-lg border border-secondary/20 bg-white px-4 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/20"
                     defaultValue={submission.status}
                     name="status"
                   >

@@ -15,10 +15,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     const nodeEnv = process.env['NODE_ENV'] ?? 'development';
     const directUrl = process.env['DIRECT_URL'];
     const pooledUrl = process.env['DATABASE_URL'];
-    const connectionString =
-      nodeEnv === 'production'
-        ? (pooledUrl ?? directUrl)
-        : (directUrl ?? pooledUrl);
+    const connectionString = pooledUrl ?? directUrl;
 
     if (!connectionString) {
       throw new Error(

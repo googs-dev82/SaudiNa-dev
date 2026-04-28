@@ -58,7 +58,7 @@ export function PortalConfirmAction({
             aria-describedby={descriptionId}
             aria-labelledby={titleId}
             aria-modal="true"
-            className="w-full max-w-lg rounded-[1.75rem] bg-background p-6 shadow-[0_30px_80px_rgba(20,38,53,0.28)]"
+            className="w-full max-w-lg rounded-lg border border-secondary/15 bg-background p-6 shadow-[0_30px_80px_rgba(49,92,63,0.18)]"
             role="dialog"
           >
             <div className="space-y-2">

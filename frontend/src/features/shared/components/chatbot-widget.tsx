@@ -13,7 +13,7 @@ function MeetingCard({ locale, meeting }: { locale: Locale; meeting: ChatbotMeet
   const address = locale === "ar" ? meeting.addressAr : meeting.addressEn;
 
   return (
-    <div className="mt-3 rounded-2xl border border-border/50 bg-background/90 p-3 text-foreground">
+    <div className="mt-3 rounded-lg border border-secondary/15 bg-background/90 p-3 text-foreground">
       <div className="text-sm font-semibold text-primary">{title}</div>
       <div className="mt-1 text-xs text-muted-foreground">
         {[meeting.city, meeting.district, meeting.dayOfWeek, meeting.startTime].filter(Boolean).join(" • ")}
@@ -80,7 +80,7 @@ function AssistantPayload({
           {response.followUpSuggestions.map((suggestion) => (
             <button
               key={suggestion}
-              className="rounded-full border border-border/60 px-3 py-1 text-xs text-foreground transition-colors hover:bg-muted"
+              className="rounded-full border border-secondary/20 px-3 py-1 text-xs text-foreground transition-colors hover:bg-secondary/5"
               onClick={() => void onSuggestionClick(suggestion)}
               type="button"
             >
@@ -101,7 +101,7 @@ export function ChatbotWidget({ locale }: { locale: Locale }) {
   return (
     <div className="fixed bottom-6 left-6 z-[100] flex flex-col items-start gap-3">
       {open ? (
-        <div className="w-[min(92vw,24rem)] rounded-3xl border border-border/40 bg-card p-4 editorial-shadow">
+        <div className="w-[min(92vw,24rem)] rounded-lg border border-secondary/15 bg-card p-4 editorial-shadow">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-bold text-primary">{locale === "ar" ? "مساعد الرسالة" : "Message Assistant"}</h3>
             <button className="rounded-full p-2 hover:bg-muted" onClick={() => setOpen(false)} type="button">

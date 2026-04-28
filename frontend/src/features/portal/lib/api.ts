@@ -34,12 +34,20 @@ export interface PortalRecoveryMeeting {
 export interface PortalInServiceMeeting {
   id: string;
   committeeId: string;
+  meetingFormat: "PHYSICAL" | "ZOOM";
   titleAr: string;
   titleEn: string;
   description?: string | null;
   meetingDate: string;
   startTime: string;
   endTime?: string | null;
+  venueName?: string | null;
+  city?: string | null;
+  district?: string | null;
+  address?: string | null;
+  zoomJoinUrl?: string | null;
+  zoomMeetingId?: string | null;
+  zoomPasscode?: string | null;
   mom: string;
   attendeesCount?: number | null;
   notes?: string | null;

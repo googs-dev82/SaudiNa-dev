@@ -46,7 +46,16 @@ describe("MeetingsExplorer", () => {
       <MeetingsExplorer
         locale="en"
         areas={[]}
-        meetings={[]}
+        meetings={[
+          {
+            id: "m1",
+            nameAr: "اجتماع",
+            nameEn: "Meeting",
+            city: "Riyadh",
+            dayOfWeek: "Sunday",
+            startTime: "19:00",
+          },
+        ]}
         initialFilters={{ city: "Riyadh", view: "list" }}
       />,
     );

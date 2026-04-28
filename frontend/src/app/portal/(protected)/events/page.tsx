@@ -1,4 +1,5 @@
 import { EventsManagement } from "@/features/portal/components/events-management";
+import { GovernanceEmptyState, GovernanceSection } from "@/features/portal/components/governance-ui";
 import { canAccessPortalHref } from "@/features/portal/lib/navigation";
 import { getPortalMyEvents } from "@/features/portal/lib/api";
 import { getPortalLocale, requirePortalUser } from "@/features/portal/lib/session";
@@ -9,16 +10,23 @@ export default async function PortalEventsPage() {
 
   if (!canAccessPortalHref(user, "/portal/events")) {
     return (
-      <div className="rounded-3xl border border-border/60 bg-card p-8 editorial-shadow">
-        <h2 className="text-2xl font-bold text-primary">
-          {locale === "ar" ? "الوصول مقيد" : "Access restricted"}
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          {locale === "ar"
+      <GovernanceSection
+        title={locale === "ar" ? "الوصول مقيد" : "Access restricted"}
+        description={
+          locale === "ar"
             ? "الأدوار الحالية لا تمنحك صلاحية إدارة الفعاليات."
-            : "Your current roles do not allow event management access."}
-        </p>
-      </div>
+            : "Your current roles do not allow event management access."
+        }
+      >
+        <GovernanceEmptyState
+          title={locale === "ar" ? "إدارة الفعاليات غير متاحة" : "Event management is unavailable"}
+          description={
+            locale === "ar"
+              ? "تحتاج إلى دور أو تعيين يسمح بإنشاء الفعاليات ومراجعتها."
+              : "You need a role or assignment that allows event creation and review."
+          }
+        />
+      </GovernanceSection>
     );
   }
 

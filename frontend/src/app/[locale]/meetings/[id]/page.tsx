@@ -15,13 +15,14 @@ export default async function MeetingDetailsPage({ params }: { params: Promise<{
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-16 md:px-8">
-      <Link href={`/${locale}/meetings`} className="text-sm font-medium text-primary">
+      <Link href={`/${locale}/meetings`} className="text-sm font-medium text-primary hover:text-secondary">
         {locale === "ar" ? "العودة للاجتماعات" : "Back to meetings"}
       </Link>
 
-      <Card className="mt-6 bg-white">
+      <Card className="mt-6 rounded-lg border-secondary/15 bg-white shadow-sm">
         <CardContent className="space-y-6 p-8">
           <div>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-secondary">{locale === "ar" ? "تفاصيل الاجتماع" : "Meeting details"}</p>
             <h1 className="text-4xl font-bold text-primary">{locale === "ar" ? meeting.nameAr : meeting.nameEn}</h1>
             <p className="mt-4 text-lg leading-8 text-muted-foreground">{locale === "ar" ? meeting.descriptionAr : meeting.descriptionEn}</p>
           </div>
@@ -34,11 +35,11 @@ export default async function MeetingDetailsPage({ params }: { params: Promise<{
           </div>
 
           {meeting.isOnline && meeting.meetingLink ? (
-            <a className="inline-flex rounded-xl bg-primary px-6 py-3 font-medium text-primary-foreground" href={meeting.meetingLink} rel="noreferrer" target="_blank">
+            <a className="inline-flex rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90" href={meeting.meetingLink} rel="noreferrer" target="_blank">
               {locale === "ar" ? "فتح رابط الاجتماع" : "Open meeting link"}
             </a>
           ) : (
-            <div className="rounded-2xl bg-muted p-6 text-sm text-muted-foreground">
+            <div className="rounded-lg border border-secondary/15 bg-secondary/5 p-6 text-sm text-muted-foreground">
               <p>{locale === "ar" ? meeting.addressAr : meeting.addressEn}</p>
               {meeting.latitude && meeting.longitude ? <p className="mt-2">{meeting.latitude}, {meeting.longitude}</p> : null}
             </div>
@@ -51,7 +52,7 @@ export default async function MeetingDetailsPage({ params }: { params: Promise<{
 
 function InfoBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-muted/40 p-5">
+    <div className="rounded-lg border border-secondary/10 bg-secondary/5 p-5">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
       <p className="mt-3 text-lg font-medium text-primary">{value}</p>
     </div>

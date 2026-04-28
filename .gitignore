@@ -34,3 +34,6 @@ npm-debug.log*
 # Temp files
 backend/prisma-error.txt
 backend/build-output.txt
+
+# Local licensed font experiments; use committed open-source fonts instead.
+frontend/public/fonts/sf-arabic.ttf

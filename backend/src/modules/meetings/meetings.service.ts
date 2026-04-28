@@ -171,6 +171,7 @@ export class MeetingsService {
     user: CurrentUserContext,
   ) {
     this.authorizationService.assertCommitteeSecretary(user, input.committeeId);
+    this.validateInServiceMeetingShape(input);
     const meeting = await this.meetingsRepository.createInServiceMeeting(
       input,
       user.id,
@@ -202,6 +203,7 @@ export class MeetingsService {
         'Only draft in-service meetings can be edited.',
       );
     }
+    this.validateInServiceMeetingShape(input);
 
     const updated = await this.meetingsRepository.updateInServiceMeeting(
       id,
@@ -395,6 +397,25 @@ export class MeetingsService {
       (input.latitude === undefined || input.longitude === undefined)
     ) {
       throw new BadRequestException('In-person meetings require coordinates.');
+    }
+  }
+
+  private validateInServiceMeetingShape(
+    input: CreateInServiceMeetingDto | UpdateInServiceMeetingDto,
+  ): void {
+    if (input.meetingFormat === 'PHYSICAL') {
+      if (!input.venueName || !input.city || !input.address) {
+        throw new BadRequestException(
+          'Physical in-service meetings require venue name, city, and address.',
+        );
+      }
+      return;
+    }
+
+    if (!input.zoomJoinUrl || !input.zoomMeetingId) {
+      throw new BadRequestException(
+        'Zoom in-service meetings require a join URL and meeting ID.',
+      );
     }
   }
 }

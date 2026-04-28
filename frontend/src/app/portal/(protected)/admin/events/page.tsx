@@ -1,4 +1,5 @@
 import { EventsManagement } from "@/features/portal/components/events-management";
+import { GovernanceEmptyState, GovernanceSection } from "@/features/portal/components/governance-ui";
 import { getPortalEvents } from "@/features/portal/lib/api";
 import { getPortalLocale, requirePortalUser } from "@/features/portal/lib/session";
 
@@ -7,16 +8,23 @@ export default async function PortalAdminEventsPage() {
   const locale = await getPortalLocale(user);
   if (!user.roles.includes("SUPER_ADMIN")) {
     return (
-      <div className="rounded-3xl border border-border/60 bg-card p-8 editorial-shadow">
-        <h2 className="text-2xl font-bold text-primary">
-          {locale === "ar" ? "الوصول مقيد" : "Access restricted"}
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          {locale === "ar"
+      <GovernanceSection
+        title={locale === "ar" ? "الوصول مقيد" : "Access restricted"}
+        description={
+          locale === "ar"
             ? "يمكن للمشرفين العامين فقط الوصول إلى سجل حوكمة الفعاليات."
-            : "Only super administrators can access the event governance register."}
-        </p>
-      </div>
+            : "Only super administrators can access the event governance register."
+        }
+      >
+        <GovernanceEmptyState
+          title={locale === "ar" ? "حوكمة الفعاليات غير متاحة" : "Event governance is unavailable"}
+          description={
+            locale === "ar"
+              ? "هذه الصفحة مخصصة لمراجعة النشر والحجز عبر جميع الفعاليات."
+              : "This page is reserved for reviewing publication and booking state across all events."
+          }
+        />
+      </GovernanceSection>
     );
   }
   const events = await getPortalEvents();

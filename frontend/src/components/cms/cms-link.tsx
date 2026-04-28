@@ -3,16 +3,26 @@ import type { Locale } from "@/config/site";
 import type { CmsLink } from "@/types/cms";
 import { getLocalizedValue } from "@/types/cms";
 
+const unlocalizedAppPrefixes = ["/portal", "/studio", "/api"];
+
+export function getLocalizedHref(href: string, locale: Locale) {
+  if (href === "/") {
+    return `/${locale}`;
+  }
+
+  if (unlocalizedAppPrefixes.some((prefix) => href === prefix || href.startsWith(`${prefix}/`))) {
+    return href;
+  }
+
+  return `/${locale}${href}`;
+}
+
 export function getCmsHref(link: CmsLink, locale: Locale) {
   if (link.kind === "external") {
     return link.href;
   }
 
-  if (link.href === "/") {
-    return `/${locale}`;
-  }
-
-  return `/${locale}${link.href}`;
+  return getLocalizedHref(link.href, locale);
 }
 
 export function CmsLinkText({ link, locale, className }: { link: CmsLink; locale: Locale; className?: string }) {

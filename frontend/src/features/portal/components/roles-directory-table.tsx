@@ -67,7 +67,7 @@ export function RolesDirectoryTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-2.5 shadow-sm">
+      <div className="flex items-center justify-between rounded-lg border border-secondary/15 bg-white/80 px-4 py-2.5 shadow-sm">
         <p className="text-sm font-medium text-muted-foreground">
           {selectedIds.length > 0 
             ? `${selectedIds.length} item${selectedIds.length === 1 ? "" : "s"} selected`

@@ -43,7 +43,7 @@ export function PortalAppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={false} size="lg">
               <Link href="/portal">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
                   <ShieldCheck className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -59,9 +59,9 @@ export function PortalAppSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <div className="rounded-[1.35rem] bg-sidebar-accent/60 p-4">
+        <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/60 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-sidebar-primary/12 text-sidebar-primary">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/12 text-sidebar-primary">
               <Sparkles className="size-5" />
             </div>
             {state === "collapsed" ? null : (
@@ -89,7 +89,7 @@ export function PortalAppSidebar({
           ) : (
             <>
               <SidebarGroupLabel>{t("portal.sidebar.signedIn")}</SidebarGroupLabel>
-              <div className="rounded-[1.35rem] bg-sidebar-accent/55 p-4">
+              <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/55 p-4">
                 <p className="truncate text-sm font-medium text-sidebar-foreground">
                   {user.displayName}
                 </p>

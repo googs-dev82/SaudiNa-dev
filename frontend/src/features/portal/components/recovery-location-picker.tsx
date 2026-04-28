@@ -13,7 +13,7 @@ const RecoveryLocationPickerMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-72 items-center justify-center rounded-3xl border border-dashed border-border/40 bg-muted/10 text-sm text-muted-foreground">
+      <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-secondary/20 bg-secondary/5 text-sm text-muted-foreground">
         Loading map picker...
       </div>
     ),
@@ -39,14 +39,14 @@ export function RecoveryLocationPicker({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border/30 bg-muted/10 p-4 text-sm text-muted-foreground">
+      <div className="rounded-lg border border-secondary/15 bg-white/80 p-4 text-sm text-muted-foreground">
         Click on the map to drop a pin. Coordinates are optional, but using the
         picker improves meeting discovery and map accuracy.
       </div>
 
       <RecoveryLocationPickerMap value={value} onChange={setValue} />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-background/80 px-4 py-3 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-secondary/10 bg-white/80 px-4 py-3 text-sm">
         <div className="text-muted-foreground">
           {value ? (
             <span>

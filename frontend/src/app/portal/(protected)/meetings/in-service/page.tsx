@@ -1,7 +1,8 @@
+import Link from "next/link";
+import { MapPin, Video } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { PortalConfirmAction } from "@/features/portal/components/portal-confirm-action";
 import {
   GovernanceEmptyState,
@@ -12,7 +13,7 @@ import {
   GovernancePageHeader,
   GovernanceSection,
 } from "@/features/portal/components/governance-ui";
-import { PlannedActivitiesField } from "@/features/portal/components/planned-activities-field";
+import { InServiceMeetingForm } from "@/features/portal/components/in-service-meeting-form";
 import {
   PortalCommittee,
   PortalInServiceMeeting,
@@ -23,13 +24,11 @@ import {
 import { canAccessPortalHref } from "@/features/portal/lib/navigation";
 import {
   approvePortalInServiceMeetingAction,
-  createPortalInServiceMeetingAction,
   rejectPortalInServiceMeetingAction,
   submitPortalInServiceMeetingAction,
   updatePortalInServiceMeetingAction,
 } from "@/features/portal/lib/mutations";
 import { getPortalLocale, requirePortalUser } from "@/features/portal/lib/session";
-import { CreateInServiceMeetingDialog } from "@/features/portal/components/create-in-service-meeting-dialog";
 
 function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat("en-SA", {
@@ -46,7 +45,7 @@ function statusTone(status: string) {
     case "REJECTED":
       return "bg-rose-100 text-rose-800";
     case "ARCHIVED":
-      return "bg-slate-200 text-slate-700";
+      return "bg-secondary/10 text-primary";
     default:
       return "bg-sky-100 text-sky-800";
   }
@@ -64,7 +63,7 @@ function renderActivitySummary(activities: PortalInServiceMeeting["plannedActivi
   return (
     <div className="flex flex-col gap-2">
       {activities.map((activity, index) => (
-        <div key={`${String(activity.description ?? "activity")}-${index}`} className="rounded-xl bg-white/90 px-3 py-2 text-sm">
+        <div key={`${String(activity.description ?? "activity")}-${index}`} className="rounded-lg border border-secondary/10 bg-white/90 px-3 py-2 text-sm">
           <p className="font-medium text-primary">
             {String(activity.description ?? `Activity ${index + 1}`)}
           </p>
@@ -104,6 +103,14 @@ export default async function PortalInServiceMeetingsPage() {
           noWorkflowsDesc: "أنشئ أول سجل اجتماع أو انتظر وصول سير عمل ضمن نطاق التعيين.",
           registerTitle: "سجل سير العمل",
           registerDesc: "كل بطاقة تجمع محتوى الاجتماع والأنشطة المخططة وحالة الاعتماد والإجراءات التالية.",
+          createPhysical: "اجتماع حضوري",
+          createZoom: "اجتماع Zoom",
+          format: "النوع",
+          physical: "حضوري",
+          zoom: "Zoom",
+          venue: "المكان",
+          location: "الموقع",
+          zoomAccess: "بيانات Zoom",
           committee: "اللجنة",
           start: "البداية",
           end: "النهاية",
@@ -136,6 +143,14 @@ export default async function PortalInServiceMeetingsPage() {
           noWorkflowsDesc: "Create the first meeting record or wait for a committee-scoped workflow to enter your assignment scope.",
           registerTitle: "Workflow register",
           registerDesc: "Each card brings together meeting content, planned activities, approval state, and the next available actions.",
+          createPhysical: "Physical meeting",
+          createZoom: "Zoom meeting",
+          format: "Format",
+          physical: "Physical",
+          zoom: "Zoom",
+          venue: "Venue",
+          location: "Location",
+          zoomAccess: "Zoom access",
           committee: "Committee",
           start: "Start",
           end: "End",
@@ -199,7 +214,22 @@ export default async function PortalInServiceMeetingsPage() {
         title={copy.title}
         description={copy.description}
         breadcrumb={[locale === "ar" ? "البوابة" : "Portal", copy.eyebrow, copy.title]}
-        primaryAction={<CreateInServiceMeetingDialog committees={committees} />}
+        primaryAction={
+          <>
+            <Button asChild className="shadow-sm">
+              <Link href="/portal/meetings/in-service/physical">
+                <MapPin data-icon="inline-start" />
+                {copy.createPhysical}
+              </Link>
+            </Button>
+            <Button asChild className="shadow-sm" variant="secondary">
+              <Link href="/portal/meetings/in-service/zoom">
+                <Video data-icon="inline-start" />
+                {copy.createZoom}
+              </Link>
+            </Button>
+          </>
+        }
       />
 
       <GovernanceMetricGrid>
@@ -234,6 +264,9 @@ export default async function PortalInServiceMeetingsPage() {
               badges={
                 <>
                   <Badge className={statusTone(meeting.status)}>{meeting.status}</Badge>
+                  <Badge variant="outline">
+                    {meeting.meetingFormat === "ZOOM" ? copy.zoom : copy.physical}
+                  </Badge>
                   <Badge className="bg-accent text-accent-foreground">
                     {formatDateLabel(meeting.meetingDate)}
                   </Badge>
@@ -246,9 +279,9 @@ export default async function PortalInServiceMeetingsPage() {
                     columns={4}
                     items={[
                       { label: copy.committee, value: getCommitteeName(committees, meeting.committeeId) },
+                      { label: copy.format, value: meeting.meetingFormat === "ZOOM" ? copy.zoom : copy.physical },
                       { label: copy.start, value: meeting.startTime },
                       { label: copy.end, value: meeting.endTime ?? (locale === "ar" ? "غير محدد" : "Not set") },
-                      { label: copy.updated, value: formatDateLabel(meeting.updatedAt) },
                     ]}
                   />
                 </div>
@@ -258,13 +291,30 @@ export default async function PortalInServiceMeetingsPage() {
                 ) : null}
 
                 <div className="grid gap-4 xl:grid-cols-2">
-                  <div className="rounded-[1.35rem] bg-white/88 p-4">
+                  <div className="rounded-lg border border-secondary/10 bg-white/88 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-secondary/80">
+                      {meeting.meetingFormat === "ZOOM" ? copy.zoomAccess : copy.location}
+                    </p>
+                    {meeting.meetingFormat === "ZOOM" ? (
+                      <div className="mt-3 grid gap-2 text-sm text-muted-foreground">
+                        <p>{meeting.zoomJoinUrl}</p>
+                        <p>{copy.zoom}: {meeting.zoomMeetingId ?? (locale === "ar" ? "غير محدد" : "Not set")}</p>
+                      </div>
+                    ) : (
+                      <div className="mt-3 grid gap-2 text-sm text-muted-foreground">
+                        <p className="font-medium text-primary">{meeting.venueName}</p>
+                        <p>{[meeting.city, meeting.district].filter(Boolean).join(" · ")}</p>
+                        <p>{meeting.address}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="rounded-lg border border-secondary/10 bg-white/88 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-secondary/80">
                       {copy.minutes}
                     </p>
                     <p className="mt-3 text-sm leading-7 text-muted-foreground">{meeting.mom}</p>
                   </div>
-                  <div className="rounded-[1.35rem] bg-white/88 p-4">
+                  <div className="rounded-lg border border-secondary/10 bg-white/88 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-secondary/80">
                       {copy.activities}
                     </p>
@@ -285,60 +335,19 @@ export default async function PortalInServiceMeetingsPage() {
                   />
                 ) : null}
 
-                <form
-                  action={updatePortalInServiceMeetingAction}
-                  className="grid gap-4 rounded-[1.5rem] bg-white/92 p-5 xl:grid-cols-2"
-                >
-                  <input name="meetingId" type="hidden" value={meeting.id} />
-                  <select
-                    name="committeeId"
-                    className="h-12 rounded-xl border border-border/50 bg-white px-4 text-sm text-foreground shadow-sm"
-                    defaultValue={meeting.committeeId}
-                    required
-                  >
-                    {committees.map((committee) => (
-                      <option key={committee.id} value={committee.id}>
-                        {committee.nameEn}
-                      </option>
-                    ))}
-                  </select>
-                  <Input
-                    name="meetingDate"
-                    type="date"
-                    defaultValue={meeting.meetingDate.slice(0, 10)}
-                    required
-                  />
-                  <Input name="titleEn" defaultValue={meeting.titleEn} required />
-                  <Input name="titleAr" defaultValue={meeting.titleAr} required />
-                  <Input name="startTime" type="time" defaultValue={meeting.startTime} required />
-                  <Input name="endTime" type="time" defaultValue={meeting.endTime ?? ""} />
-                  <Textarea
-                    name="description"
-                    defaultValue={meeting.description ?? ""}
-                    className="xl:col-span-2"
-                  />
-                  <Textarea
-                    name="mom"
-                    defaultValue={meeting.mom}
-                    className="xl:col-span-2"
-                    required
-                  />
-                  <PlannedActivitiesField defaultValue={meeting.plannedActivities} />
-                  <Textarea
-                    name="notes"
-                    defaultValue={meeting.notes ?? ""}
-                    className="xl:col-span-2"
-                  />
-                  {meeting.status === "DRAFT" ? (
-                    <div className="xl:col-span-2">
-                      <Button type="submit" variant="outline">
-                        Save draft
-                      </Button>
-                    </div>
-                  ) : null}
-                </form>
+                {meeting.status === "DRAFT" ? (
+                  <div className="rounded-lg border border-secondary/10 bg-white/92 p-5">
+                    <InServiceMeetingForm
+                      action={updatePortalInServiceMeetingAction}
+                      committees={committees}
+                      format={meeting.meetingFormat}
+                      meeting={meeting}
+                      submitLabel={locale === "ar" ? "حفظ المسودة" : "Save draft"}
+                    />
+                  </div>
+                ) : null}
 
-                <div className="flex flex-wrap gap-3 border-t border-border/20 pt-6">
+                <div className="flex flex-wrap gap-3 border-t border-secondary/10 pt-6">
                   {meeting.status === "DRAFT" ? (
                     <PortalConfirmAction
                       action={submitPortalInServiceMeetingAction}

@@ -18,14 +18,14 @@ export function PortalLocaleSwitcher({ locale }: { locale: PortalLocale }) {
 
   return (
     <div
-      className="flex items-center rounded-md border border-border bg-muted/40 p-0.5"
+      className="flex items-center rounded-lg border border-secondary/15 bg-white/80 p-0.5 shadow-sm"
       aria-label={locale === "ar" ? "مبدّل اللغة" : "Language switcher"}
     >
       <Button
         className={cn(
-          "h-6 rounded px-2 text-xs font-semibold transition-all",
+          "h-7 rounded-md px-2 text-xs font-semibold transition-all",
           locale === "ar"
-            ? "bg-background text-foreground shadow-sm"
+            ? "bg-secondary text-secondary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground",
         )}
         disabled={isPending}
@@ -37,9 +37,9 @@ export function PortalLocaleSwitcher({ locale }: { locale: PortalLocale }) {
       </Button>
       <Button
         className={cn(
-          "h-6 rounded px-2 text-xs font-semibold transition-all",
+          "h-7 rounded-md px-2 text-xs font-semibold transition-all",
           locale === "en"
-            ? "bg-background text-foreground shadow-sm"
+            ? "bg-secondary text-secondary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground",
         )}
         disabled={isPending}

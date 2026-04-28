@@ -35,7 +35,7 @@ import { RecoveryMeetingActions } from "./recovery-meeting-actions";
 import { GovernanceMetricCard, GovernanceMetricGrid, GovernancePageHeader } from "./governance-ui";
 
 const selectClassName =
-  "h-12 rounded-xl border border-border/40 bg-white px-4 text-sm text-foreground shadow-sm focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/10";
+  "h-12 rounded-lg border border-secondary/20 bg-white px-4 text-sm text-foreground shadow-sm focus-visible:border-secondary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/20";
 
 function statusTone(status: string) {
   if (status === "PUBLISHED") {
@@ -43,7 +43,7 @@ function statusTone(status: string) {
   }
 
   if (status === "ARCHIVED") {
-    return "bg-slate-200 text-slate-700";
+    return "bg-secondary/10 text-primary";
   }
 
   return "bg-amber-100 text-amber-800";

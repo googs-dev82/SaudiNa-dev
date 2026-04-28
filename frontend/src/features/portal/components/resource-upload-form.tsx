@@ -69,9 +69,10 @@ export function ResourceUploadForm({ categories, onCancel }: ResourceUploadFormP
         }
 
         const uploadResponse = await fetch(uploadUrl, {
-          method: "PUT",
+          method: "POST",
           headers: {
-            "Content-Type": "application/octet-stream",
+            "Content-Type": file.type || "application/octet-stream",
+            "cache-control": "3600",
           },
           body: file,
         });

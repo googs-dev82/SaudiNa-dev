@@ -31,10 +31,10 @@ export function PortalShell({
       }
     >
       <PortalAppSidebar items={navItems} user={user} locale={locale} />
-      <SidebarInset className="min-w-0 bg-[radial-gradient(circle_at_top,rgba(214,187,125,0.12),transparent_24%),linear-gradient(180deg,#f8f6f1_0%,#f5f6f7_100%)]">
+      <SidebarInset className="min-w-0 bg-[linear-gradient(180deg,#fdfcf9_0%,#f4f7ef_52%,#fdfcf9_100%)]">
         <PortalSiteHeader items={navItems} locale={locale} />
         <div className="flex flex-1 flex-col">
-          <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
+          <div className="mx-auto flex w-full max-w-[1500px] flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
             {children}
           </div>
         </div>

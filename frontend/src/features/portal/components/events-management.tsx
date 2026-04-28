@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,6 +15,13 @@ import {
   getEventStatusLabel,
   getEventVisibilityLabel,
 } from "@/features/events/lib/event-labels";
+import {
+  GovernanceEmptyState,
+  GovernanceMetricCard,
+  GovernanceMetricGrid,
+  GovernancePageHeader,
+  GovernanceSection,
+} from "@/features/portal/components/governance-ui";
 
 export function EventsManagement({
   locale,
@@ -116,31 +122,41 @@ export function EventsManagement({
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="border-border/60 bg-white/95 shadow-sm">
-        <div className="flex flex-col gap-4 px-6 pt-6 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-primary">{title}</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">{description}</p>
-          </div>
-          {primaryActionHref && primaryActionLabel ? (
+      <GovernancePageHeader
+        eyebrow={locale === "ar" ? "الفعاليات" : "Events"}
+        title={title}
+        description={description}
+        breadcrumb={[locale === "ar" ? "البوابة" : "Portal", locale === "ar" ? "الفعاليات" : "Events", title]}
+        primaryAction={
+          primaryActionHref && primaryActionLabel ? (
             <a
               href={primaryActionHref}
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             >
               {primaryActionLabel}
             </a>
-          ) : null}
-        </div>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Stat label={labels.total} value={summary.total.toString()} />
-          <Stat label={labels.public} value={summary.publicCount.toString()} />
-          <Stat label={labels.private} value={summary.privateCount.toString()} />
-          <Stat label={locale === "ar" ? "Zoom" : "Zoom enabled"} value={summary.zoomEnabledCount.toString()} />
-          <Stat label={labels.tentative} value={summary.tentativeCount.toString()} />
-          <Stat label={labels.confirmed} value={summary.confirmedCount.toString()} />
-        </CardContent>
-        <div className="border-t border-border/50" />
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          ) : null
+        }
+      />
+
+      <GovernanceMetricGrid>
+        <GovernanceMetricCard label={labels.total} value={summary.total} hint={locale === "ar" ? "كل الفعاليات ضمن نطاقك." : "All events currently in your scope."} />
+        <GovernanceMetricCard label={labels.public} value={summary.publicCount} hint={locale === "ar" ? "فعاليات ظاهرة للعامة." : "Events visible to the public site."} />
+        <GovernanceMetricCard label={labels.private} value={summary.privateCount} hint={locale === "ar" ? "فعاليات داخلية أو محدودة." : "Internal or limited-audience events."} />
+        <GovernanceMetricCard label={locale === "ar" ? "Zoom" : "Zoom enabled"} value={summary.zoomEnabledCount} hint={locale === "ar" ? "فعاليات لديها اجتماع Zoom." : "Events with Zoom meeting access."} />
+        <GovernanceMetricCard label={labels.tentative} value={summary.tentativeCount} hint={locale === "ar" ? "فعاليات لم يتم تثبيتها بعد." : "Events not fully confirmed yet."} />
+        <GovernanceMetricCard label={labels.confirmed} value={summary.confirmedCount} hint={locale === "ar" ? "فعاليات مؤكدة وجاهزة." : "Confirmed events ready for use."} />
+      </GovernanceMetricGrid>
+
+      <GovernanceSection
+        title={locale === "ar" ? "تصفية الفعاليات" : "Filter events"}
+        description={
+          locale === "ar"
+            ? "استخدم البحث والعوامل لمراجعة السجلات المهمة بسرعة."
+            : "Use search and filters to quickly review the records that matter."
+        }
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
               {labels.search}
@@ -221,11 +237,18 @@ export function EventsManagement({
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </GovernanceSection>
 
-      <Card className="border-border/60 bg-white/95 shadow-sm">
-        <CardContent className="p-0">
+      <GovernanceSection
+        title={locale === "ar" ? "سجل الفعاليات" : "Events register"}
+        description={
+          locale === "ar"
+            ? "كل صف يعرض الحالة التشغيلية وحالة النشر والإجراءات التالية."
+            : "Each row shows operational state, publication posture, and next actions."
+        }
+      >
+        <div className="overflow-hidden rounded-lg border border-secondary/10 bg-secondary/5">
           <Table>
             <TableHeader>
               <TableRow>
@@ -242,7 +265,14 @@ export function EventsManagement({
               {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
-                    {labels.empty}
+                    <GovernanceEmptyState
+                      title={labels.empty}
+                      description={
+                        locale === "ar"
+                          ? "غيّر عوامل التصفية أو أنشئ فعالية جديدة عندما تكون جاهزًا."
+                          : "Adjust the filters or create a new event when you are ready."
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -306,17 +336,8 @@ export function EventsManagement({
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-muted/30 p-4">
-      <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-primary">{value}</div>
+        </div>
+      </GovernanceSection>
     </div>
   );
 }
